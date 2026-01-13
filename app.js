@@ -3,7 +3,6 @@ const API =
     ? "http://localhost:3000"
     : "https://food-pre-order-app.onrender.com";
 
-
 const vendorsDiv = document.getElementById("vendors");
 const cartDiv = document.getElementById("cart");
 
