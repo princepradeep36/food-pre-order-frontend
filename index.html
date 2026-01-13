@@ -127,6 +127,9 @@ const API =
     ? "http://localhost:3000"
     : "https://food-pre-order-backend.onrender.com";
 
+    const vendors = document.getElementById("vendors");
+
+
 let cart = {}; // cart[vendorId] = { vendor, vendor_phone, items: [{id,item_name,price,quantity}] }
 
 function loadVendors(){
