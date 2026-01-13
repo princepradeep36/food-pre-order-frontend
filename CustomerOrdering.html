@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skane Tamil Sangam</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 10px;
+      background: #f7f7f7;
+    }
+
+    h1, h2, h3, h4 {
+      text-align: center;
+      margin: 5px 0;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      max-width: 300px;
+      box-sizing: border-box;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    button {
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .vendor {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .menu-item {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin: 5px 0;
+      border-bottom: 1px dashed #ccc;
+      padding-bottom: 5px;
+    }
+
+    .menu-item div {
+      margin-bottom: 5px;
+    }
+
+    .menu-item input[type="number"] {
+      width: 60px;
+      padding: 5px;
+    }
+
+    #cart {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+    }
+
+    #cart div {
+      margin-bottom: 10px;
+    }
+
+    @media(max-width: 500px){
+      .menu-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .menu-item button {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<center>
+<h1 style="color:rgb(71, 108, 255);">Skane Tamil Sangam</h1>
+<h2 style="color:rgb(255, 71, 181);">Pongal event 2026</h2>
+<h3 style="color:Tomato;">Snacks Pre-Order App</h3>
+</center>
+
+<h4 style="text-align: left;">
+  Each item will be added to the below cart, Please check the cart at the bottom after adding the item
+</h4>
+
+<!-- CUSTOMER INFO -->
+<input id="name" placeholder="Name" required>
+<input id="phone" placeholder="Phone" type="tel" pattern="[0-9]{10}" required title="Enter a 10-digit phone number">
+
+<!-- MY ORDERS LINK -->
+<button onclick="openOrders()">My Orders</button>
+
+<hr>
+
+<h2>Menu</h2>
+<div id="vendors"></div>
+
+<h2>Cart</h2>
+<div id="cart">Cart is empty</div>
+<button onclick="checkout()">Checkout</button>
+
+<script>
+const API = "http://localhost:3000";
+let cart = {}; // cart[vendorId] = { vendor, vendor_phone, items: [{id,item_name,price,quantity}] }
+
+function loadVendors(){
+  fetch(`${API}/vendors`)
+    .then(res=>res.json())
+    .then(data=>{
+      const container = document.getElementById("vendors");
+      container.innerHTML = "";
+      data.forEach(v=>{
+        const div = document.createElement("div");
+        div.className = "vendor";
+
+        let menuHtml = '';
+        v.menu.forEach(m=>{
+          menuHtml += `
+            <div class="menu-item">
+              <div>${m.item_name} -${m.price}kr</div>
+              <div>
+                Qty: <input type="number" min="1" value="1" id="qty_${m.id}">
+                <button onclick="addToCart(${v.id}, '${v.name}', '${v.phone}', ${m.id}, '${m.item_name}', ${m.price})">Add</button>
+              </div>
+            </div>
+          `;
+        });
+
+        div.innerHTML = `<h3>${v.name} (${v.phone})</h3>${menuHtml}`;
+        container.appendChild(div);
+      });
+    });
+}
+
+function addToCart(vendorId, vendorName, vendorPhone, itemId, itemName, price){
+  const qty = Number(document.getElementById(`qty_${itemId}`).value);
+  if(qty <= 0) return alert("Enter valid quantity");
+
+  if(!cart[vendorId]){
+    cart[vendorId] = { vendor: vendorName, vendor_phone: vendorPhone, items: [] };
+  }
+
+  const existing = cart[vendorId].items.find(i=>i.id===itemId);
+  if(existing){
+    existing.quantity += qty;
+  } else {
+    cart[vendorId].items.push({ id:itemId, item_name:itemName, price, quantity:qty });
+  }
+
+  renderCart();
+}
+
+function renderCart(){
+  const container = document.getElementById("cart");
+  container.innerHTML = "";
+
+  let hasItems = false;
+  for(const vendorId in cart){
+    const vCart = cart[vendorId];
+    let total = 0;
+    const itemsHtml = vCart.items.map(i=>{
+      total += i.price*i.quantity;
+      return `${i.item_name} x ${i.quantity} = ${i.price*i.quantity}kr`;
+    }).join('<br>');
+
+    container.innerHTML += `
+      <div>
+        <strong>${vCart.vendor}</strong><br>
+        ${itemsHtml}<br>
+        <em>Total: ${total}kr | Phone: ${vCart.vendor_phone}</em>
+      </div>
+      <hr>
+    `;
+    hasItems = true;
+  }
+
+  if(!hasItems) container.innerHTML = "Cart is empty";
+}
+
+function checkout(){
+  if(Object.keys(cart).length===0) return alert("Cart is empty");
+
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+
+  // Validate name and phone
+  if(!name) return alert("Name is required");
+  if(!phone) return alert("Phone is required");
+  if(!/^\d{10}$/.test(phone)) return alert("Phone number must be 10 digits");
+
+  fetch(`${API}/order`, {
+    method:"POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ name, phone, cart })
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    alert("Order placed!");
+    cart = {};
+    renderCart();
+  });
+}
+
+function openOrders(){
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+
+  // Validate before opening orders
+  if(!name) return alert("Name is required");
+  if(!phone) return alert("Phone is required");
+  if(!/^\d{10}$/.test(phone)) return alert("Phone number must be 10 digits");
+
+  window.location.href = `orders.html?phone=${phone}`;
+}
+
+loadVendors();
+</script>
+
+</body>
+</html>

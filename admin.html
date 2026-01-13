@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      background: #f7f7f7;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .box {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    h3, h4 {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    input, button {
+      padding: 8px;
+      margin: 5px 0;
+      font-size: 1rem;
+    }
+
+    button {
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .menu-item {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 5px;
+      align-items: center;
+    }
+
+    .menu-item input {
+      flex: 1 1 100px;
+    }
+
+    .menu-item button {
+      flex: 1 1 auto;
+    }
+
+    @media(max-width: 600px) {
+      input, button {
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .menu-item {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Admin Panel</h1>
+
+<!-- ADD VENDOR -->
+<div class="box">
+  <h3>Add Vendor</h3>
+  <input id="vname" placeholder="Vendor Name">
+  <input id="vphone" placeholder="Vendor Phone">
+  <button onclick="addVendor()">Add Vendor</button>
+</div>
+
+<!-- VENDORS & MENU -->
+<div id="vendors"></div>
+
+<script>
+const API = "http://localhost:3000";
+
+// Load vendors and their menus
+function loadVendors() {
+  fetch(`${API}/vendors`)
+    .then(res => res.json())
+    .then(data => {
+      vendors.innerHTML = "";
+      data.forEach(v => {
+        let div = document.createElement("div");
+        div.className = "box";
+        div.innerHTML = `
+          <h3>${v.name} (${v.phone})</h3>
+          <button onclick="deleteVendor(${v.id})">Delete Vendor</button>
+
+          <div class="box">
+            <h4>Add Menu Item</h4>
+            <input id="item_${v.id}" placeholder="Item Name">
+            <input id="price_${v.id}_new" placeholder="Price" type="number" min="1">
+            <input id="max_${v.id}_new" placeholder="Max Qty" type="number" min="1">
+            <button onclick="addMenu(${v.id})">Add Item</button>
+          </div>
+
+          <h4>Menu</h4>
+        `;
+
+        // List menu items
+        v.menu.forEach(m => {
+          div.innerHTML += `
+            <div class="menu-item">
+              <input id="name_${m.id}" value="${m.item_name}">
+              <input id="price_${m.id}" value="${m.price}" type="number" min="1">
+              <input id="max_${m.id}" value="${m.max_quantity}" type="number" min="1">
+              <button onclick="updateMenu(${m.id})">Update</button>
+              <button onclick="deleteMenu(${m.id})">Delete</button>
+            </div>
+          `;
+        });
+
+        vendors.appendChild(div);
+      });
+    })
+    .catch(err => console.error("Failed to load vendors:", err));
+}
+
+// Add a vendor
+function addVendor() {
+  const name = vname.value.trim();
+  const phone = vphone.value.trim();
+  if (!name || !phone) return alert("Enter vendor name and phone");
+
+  fetch(`${API}/admin/vendor`, {
+    method: "POST",
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, phone })
+  })
+  .then(res => res.ok ? loadVendors() : res.text().then(txt => alert(txt)));
+}
+
+// Delete a vendor
+function deleteVendor(id) {
+  if (!confirm("Delete this vendor?")) return;
+
+  fetch(`${API}/admin/vendor/${id}`, { method: "DELETE" })
+    .then(res => res.ok ? loadVendors() : res.text().then(txt => alert(txt)));
+}
+
+// Add a menu item
+function addMenu(vendorId) {
+  const itemName = document.getElementById(`item_${vendorId}`).value.trim();
+  const price = Number(document.getElementById(`price_${vendorId}_new`).value);
+  const maxQty = Number(document.getElementById(`max_${vendorId}_new`).value);
+
+  if (!itemName || price <= 0 || maxQty <= 0) {
+    return alert("Enter valid item name, price, and max quantity");
+  }
+
+  fetch(`${API}/admin/menu`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      vendor_id: vendorId,
+      item_name: itemName,
+      price,
+      max_quantity: maxQty
+    })
+  })
+  .then(res => res.ok ? loadVendors() : res.text().then(txt => alert(txt)));
+}
+
+// Update a menu item
+function updateMenu(id) {
+  const itemName = document.getElementById(`name_${id}`).value.trim();
+  const price = Number(document.getElementById(`price_${id}`).value);
+  const maxQty = Number(document.getElementById(`max_${id}`).value);
+
+  if (!itemName || price <= 0 || maxQty <= 0)
+    return alert("Enter valid item name, price, and max quantity");
+
+  fetch(`${API}/admin/menu/${id}`, {
+    method: "PUT",
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ item_name: itemName, price, max_quantity: maxQty })
+  })
+  .then(res => res.ok ? loadVendors() : res.text().then(txt => alert(txt)));
+}
+
+// Delete a menu item
+function deleteMenu(id) {
+  if (!confirm("Delete this menu item?")) return;
+
+  fetch(`${API}/admin/menu/${id}`, { method: "DELETE" })
+    .then(res => res.ok ? loadVendors() : res.text().then(txt => alert(txt)));
+}
+
+// Initial load
+loadVendors();
+</script>
+
+</body>
+</html>

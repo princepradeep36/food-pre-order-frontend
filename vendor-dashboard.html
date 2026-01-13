@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skane Tamil Sangam</title>
+  <center>
+ <h1 style="color:rgb(71, 108, 255);">Skane Tamil Sangam</h1>
+  <h2 style="color:rgb(255, 71, 181);">Pongal event 2026</h2>
+  <h3 style="color:Tomato;">Snacks Pre-Order App</h3></center>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      background: #f7f7f7;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    h3 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    @media(max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+        width: 100%;
+      }
+
+      th {
+        display: none;
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        margin-bottom: 5px;
+      }
+
+      td::before {
+        content: attr(data-label);
+        font-weight: bold;
+      }
+
+      tr {
+        margin-bottom: 10px;
+        border-bottom: 2px solid #eee;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h2>Vendor Dashboard - Overall Order Summary</h2>
+<div id="summary"></div>
+
+<script>
+const API = "http://localhost:3000";
+const summaryDiv = document.getElementById("summary");
+
+function loadSummary() {
+  fetch(`${API}/vendor-summary`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.length === 0) {
+        summaryDiv.innerHTML = "<p>No orders found</p>";
+        return;
+      }
+
+      // Group by vendor
+      const vendors = {};
+      data.forEach(row => {
+        if (!vendors[row.vendor_id]) {
+          vendors[row.vendor_id] = { name: row.vendor_name, phone: row.vendor_phone, items: [] };
+        }
+        vendors[row.vendor_id].items.push(row);
+      });
+
+      summaryDiv.innerHTML = "";
+      Object.values(vendors).forEach(v => {
+        let html = `<h3>${v.name} (${v.phone})</h3>`;
+        html += `<table>
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Total Quantity</th>
+              <th>Total Amount</th>           
+            </tr>
+          </thead>
+          <tbody>`;
+
+        v.items.forEach(i => {
+          html += `<tr>
+            <td data-label="Item Name">${i.item_name}</td>
+            <td data-label="Total Quantity">${i.total_quantity || 0}</td>
+            <td data-label="Total Amount">${i.total_amount || 0}kr</td>           
+          </tr>`;
+        });
+
+        html += "</tbody></table>";
+        summaryDiv.innerHTML += html;
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      summaryDiv.innerHTML = "<p>Error loading summary</p>";
+    });
+}
+
+// Initial load
+loadSummary();
+</script>
+
+</body>
+</html>

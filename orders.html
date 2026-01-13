@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skane Tamil Sangam</title>
+  <center>
+ <h1 style="color:rgb(71, 108, 255);">Skane Tamil Sangam</h1>
+  <h2 style="color:rgb(255, 71, 181);">Pongal event 2026</h2></center>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      background: #f7f7f7;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      max-width: 300px;
+      box-sizing: border-box;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .order {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .order button {
+      margin: 5px 0;
+      width: 100%;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      padding: 5px;
+      margin: 5px 0;
+    }
+
+    @media(max-width: 500px){
+      .order button {
+        font-size: 16px;
+        padding: 10px;
+      }
+      input[type="number"] {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+ 
+<h2 style="text-align: left">My Orders</h2>
+
+<input id="phone" placeholder="Phone">
+<button onclick="loadOrders()">Load Orders</button>
+
+<hr>
+<div id="orders"></div>
+
+<script>
+const API = "http://localhost:3000";
+const ordersDiv = document.getElementById("orders");
+
+// auto-load from URL
+const params = new URLSearchParams(window.location.search);
+const phoneFromUrl = params.get("phone");
+if (phoneFromUrl) {
+  document.getElementById("phone").value = phoneFromUrl;
+  loadOrders();
+}
+
+// LOAD ORDERS
+function loadOrders() {
+  const phone = document.getElementById("phone").value.trim();
+  if (!phone) {
+    alert("Enter phone number");
+    return;
+  }
+
+  fetch(`${API}/orders/${phone}`)
+    .then(res => res.json())
+    .then(data => {
+      ordersDiv.innerHTML = "";
+      if (data.length === 0) {
+        ordersDiv.innerHTML = "<p>No orders found</p>";
+        return;
+      }
+
+      data.forEach(o => {
+        ordersDiv.innerHTML += `
+          <div class="order">
+            <h4>${o.vendor}</h4>
+            Total: ${o.total}kr<br>
+            Pay to: ${o.vendor_phone}<br>
+            Status: <b>${o.payment_status}</b><br><br>
+
+            <button onclick="editOrder(${o.id})">Edit</button>
+            <button onclick="deleteOrder(${o.id})">Delete</button>
+            ${
+              o.payment_status === "PAID"
+              ? ""
+              : `<button onclick="markPaid(${o.id})">Mark Paid</button>`
+            }
+          </div>
+        `;
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Failed to load orders");
+    });
+}
+
+// DELETE ORDER
+function deleteOrder(orderId) {
+  if (!confirm("Delete this order?")) return;
+
+  fetch(`${API}/order/${orderId}`, { method: "DELETE" })
+    .then(() => loadOrders());
+}
+
+// MARK PAID
+function markPaid(orderId) {
+  fetch(`${API}/order/${orderId}/payment`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status: "PAID" })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.extra_amount > 0) {
+      alert(`Collect ${data.extra_amount}kr for newly added items only`);
+    } else {
+      alert("All items already paid. Order complete!");
+    }
+    loadOrders();
+  });
+}
+
+// EDIT ORDER
+function editOrder(orderId) {
+  fetch(`${API}/order/${orderId}/details`)
+    .then(res => res.json())
+    .then(items => {
+      let html = `<h3>Edit Order #${orderId}</h3>`;
+
+      items.forEach(i => {
+        html += `
+          <div>
+            ${i.item_name} (${i.price}kr)
+            <input type="number"
+              value="${i.quantity}"
+              min="1"
+              onchange="updateItem(${i.id}, this.value, ${orderId})">
+          </div>
+        `;
+      });
+
+      html += `<br><button onclick="loadOrders()">Back</button>`;
+      ordersDiv.innerHTML = html;
+    });
+}
+
+// UPDATE ITEM QTY
+function updateItem(itemId, qty, orderId) {
+  fetch(`${API}/order/item/${itemId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ quantity: Number(qty) })
+  })
+  .then(() =>
+    fetch(`${API}/order/${orderId}/recalculate`, { method: "PUT" })
+  )
+  .then(() => loadOrders());
+}
+</script>
+
+</body>
+</html>
