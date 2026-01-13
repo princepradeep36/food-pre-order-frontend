@@ -14,7 +14,7 @@
       padding: 10px;
       background: #f7f7f7;
     }
-    
+
 
     h2 {
       text-align: center;
@@ -82,7 +82,11 @@
 <div id="summary"></div>
 
 <script>
-const API = "http://localhost:3000";
+const API =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://food-pre-order-backend.onrender.com";
+
 const summaryDiv = document.getElementById("summary");
 
 function loadSummary() {

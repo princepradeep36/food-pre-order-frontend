@@ -92,7 +92,11 @@
 <div id="vendors"></div>
 
 <script>
-const API = "http://localhost:3000";
+const API =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://food-pre-order-backend.onrender.com";
+
 
 // Load vendors and their menus
 function loadVendors() {
