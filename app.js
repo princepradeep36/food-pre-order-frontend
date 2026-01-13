@@ -1,7 +1,7 @@
 const API =
   window.location.hostname === "localhost"
     ? "http://localhost:3000"
-    : "https://food-pre-order-app.onrender.com";
+    : "https://food-pre-order-backend.onrender.com";
 
 const vendorsDiv = document.getElementById("vendors");
 const cartDiv = document.getElementById("cart");
