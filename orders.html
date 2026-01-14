@@ -143,8 +143,22 @@ function deleteOrder(orderId) {
   if (!confirm("Delete this order?")) return;
 
   fetch(`${API}/order/${orderId}`, { method: "DELETE" })
-    .then(() => loadOrders());
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("Delete failed");
+      }
+      return res.json(); // only if backend returns JSON
+    })
+    .then(() => {
+      alert("Order deleted");
+      loadOrders();
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Failed to delete order");
+    });
 }
+
 
 // MARK PAID
 function markPaid(orderId) {
@@ -153,16 +167,31 @@ function markPaid(orderId) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status: "PAID" })
   })
-  .then(res => res.json())
-  .then(data => {
-    if (data.extra_amount > 0) {
-      alert(`Collect ${data.extra_amount}kr for newly added items only`);
+  .then(res => {
+    if (!res.ok) {
+      throw new Error("Payment update failed");
+    }
+    return res.text(); // safer than res.json()
+  })
+  .then(text => {
+    if (text) {
+      const data = JSON.parse(text);
+      if (data.extra_amount > 0) {
+        alert(`Collect ${data.extra_amount}kr for newly added items only`);
+      } else {
+        alert("Order marked as PAID");
+      }
     } else {
-      alert("All items already paid. Order complete!");
+      alert("Order marked as PAID");
     }
     loadOrders();
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Failed to mark order as paid");
   });
 }
+
 
 // EDIT ORDER
 function editOrder(orderId) {
