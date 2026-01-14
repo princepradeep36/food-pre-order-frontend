@@ -107,7 +107,7 @@ const ordersDiv = document.getElementById("orders");
 
 // Fetch all vendors and populate dropdown
 function loadVendors() {
-  fetch(`${API}/vendors`) // assuming API endpoint that returns all vendors
+  fetch(`${API}/vendors-dropdown`) // assuming API endpoint that returns all vendors
     .then(res => res.json())
     .then(data => {
       data.forEach(vendor => {
