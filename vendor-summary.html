@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Dashboard - Skane Tamil Sangam</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      background: #f7f7f7;
+      margin: 0;
+    }
+
+    h1, h2, h3 {
+      text-align: center;
+      margin: 5px 0;
+    }
+
+    h1 { color: rgb(71, 108, 255); font-size: 1.8rem; }
+    h2 { color: rgb(255, 71, 181); font-size: 1.5rem; }
+    h3 { color: tomato; font-size: 1.2rem; }
+
+    select {
+      display: block;
+      margin: 10px auto;
+      padding: 8px;
+      font-size: 1rem;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+      word-wrap: break-word;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    @media(max-width: 600px) {
+      h1 { font-size: 1.5rem; }
+      h2 { font-size: 1.2rem; }
+      h3 { font-size: 1rem; }
+
+      table, thead, tbody, th, td, tr {
+        display: block;
+        width: 100%;
+      }
+
+      th { display: none; }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px;
+        border: 1px solid #ccc;
+        margin-bottom: 5px;
+      }
+
+      td::before {
+        content: attr(data-label);
+        font-weight: bold;
+      }
+
+      tr {
+        margin-bottom: 10px;
+        border-bottom: 2px solid #eee;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Skane Tamil Sangam</h1>
+<h2>Pongal Event 2026</h2>
+<h3>Vendor Dashboard - Orders</h3>
+
+<!-- Vendor dropdown -->
+<select id="vendorSelect">
+  <option value="">Select Vendor</option>
+</select>
+
+<!-- Orders table container -->
+<div id="orders"></div>
+
+<script>
+const API =
+  window.location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://food-pre-order-backend.onrender.com";
+
+const vendorSelect = document.getElementById("vendorSelect");
+const ordersDiv = document.getElementById("orders");
+
+// Fetch all vendors and populate dropdown
+function loadVendors() {
+  fetch(`${API}/vendors`) // assuming API endpoint that returns all vendors
+    .then(res => res.json())
+    .then(data => {
+      data.forEach(vendor => {
+        const option = document.createElement("option");
+        option.value = vendor.id;
+        option.textContent = vendor.name;
+        vendorSelect.appendChild(option);
+      });
+    })
+    .catch(err => console.error("Error loading vendors:", err));
+}
+
+// Fetch orders for selected vendor
+function loadVendorOrders(vendorId) {
+  if (!vendorId) {
+    ordersDiv.innerHTML = "";
+    return;
+  }
+
+  fetch(`${API}/vendor-orders/${vendorId}`) // endpoint to fetch orders for a vendor
+    .then(res => res.json())
+    .then(data => {
+      if (data.length === 0) {
+        ordersDiv.innerHTML = "<p>No orders found for this vendor.</p>";
+        return;
+      }
+
+      // Group orders by customer
+      const customers = {};
+      data.forEach(row => {
+        if (!customers[row.customer_id]) {
+          customers[row.customer_id] = { 
+            name: row.customer_name, 
+            phone: row.customer_phone, 
+            items: [] 
+          };
+        }
+        customers[row.customer_id].items.push(row);
+      });
+
+      ordersDiv.innerHTML = "";
+      Object.values(customers).forEach(cust => {
+        let html = `<h3>${cust.name} (${cust.phone})</h3>`;
+        html += `<table>
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+        cust.items.forEach(item => {
+          html += `<tr>
+            <td data-label="Item Name">${item.item_name}</td>
+            <td data-label="Quantity">${item.quantity}</td>
+          </tr>`;
+        });
+
+        html += "</tbody></table>";
+        ordersDiv.innerHTML += html;
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      ordersDiv.innerHTML = "<p>Error loading orders</p>";
+    });
+}
+
+// Event listener for vendor selection
+vendorSelect.addEventListener("change", () => {
+  const vendorId = vendorSelect.value;
+  loadVendorOrders(vendorId);
+});
+
+// Initial load
+loadVendors();
+</script>
+
+</body>
+</html>
