@@ -155,7 +155,8 @@ function loadVendors(){
           `;
         });
 
-        div.innerHTML = `<h3>${v.name} (${v.phone})</h3>${menuHtml}`;
+        div.innerHTML = `<h3>${v.name} (${v.phone}) - Swish: ${v.swish }</h3>${menuHtml}`;
+
         container.appendChild(div);
       });
     });
@@ -193,13 +194,13 @@ function renderCart(){
     }).join('<br>');
 
     container.innerHTML += `
-      <div>
-        <strong>${vCart.vendor}</strong><br>
-        ${itemsHtml}<br>
-        <em>Total: ${total}kr | Phone: ${vCart.vendor_phone}</em>
-      </div>
-      <hr>
-    `;
+  <div>
+    <strong>${vCart.vendor}</strong><br>
+    ${itemsHtml}<br>
+    <em>Total: ${total}kr | Contact Phone: ${vCart.vendor_phone} | Swish: ${vCart.vendor_swish || 'N/A'}</em>
+  </div>
+  <hr>
+`;
     hasItems = true;
   }
 
