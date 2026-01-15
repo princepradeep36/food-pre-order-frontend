@@ -97,6 +97,7 @@ if (phoneFromUrl) {
 }
 
 // LOAD ORDERS
+// LOAD ORDERS (Updated for Read-Only View)
 function loadOrders() {
   const phone = document.getElementById("phone").value.trim();
   if (!phone) {
@@ -114,20 +115,18 @@ function loadOrders() {
       }
 
       data.forEach(o => {
+        // Removed: Edit, Delete, and Mark Paid buttons
         ordersDiv.innerHTML += `
           <div class="order">
-            <h4>${o.vendor}</h4>
-            Total: ${o.total}kr<br>
-            Pay to: ${o.vendor_phone}<br>
-            Status: <b>${o.payment_status}</b><br><br>
-
-            <button onclick="editOrder(${o.id})">Edit</button>
-            <button onclick="deleteOrder(${o.id})">Delete</button>
-            ${
-              o.payment_status === "PAID"
-              ? ""
-              : `<button onclick="markPaid(${o.id})">Mark Paid</button>`
-            }
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4>${o.vendor}</h4>
+                <span style="padding: 4px 8px; border-radius: 4px; background: ${o.payment_status === 'PAID' ? '#d4edda' : '#f8d7da'}; color: ${o.payment_status === 'PAID' ? '#155724' : '#721c24'}; font-size: 0.8rem; font-weight: bold;">
+                    ${o.payment_status}
+                </span>
+            </div>
+            <p><strong>Total:</strong> ${o.total}kr</p>
+            <p><strong>Pay to:</strong> ${o.vendor_phone}</p>
+            <button onclick="viewOrderDetails(${o.id})" style="background-color: #6c757d;">View Items</button>
           </div>
         `;
       });
@@ -135,6 +134,28 @@ function loadOrders() {
     .catch(err => {
       console.error(err);
       alert("Failed to load orders");
+    });
+}
+
+// VIEW DETAILS (Read-Only)
+function viewOrderDetails(orderId) {
+  fetch(`${API}/order/${orderId}/details`)
+    .then(res => res.json())
+    .then(items => {
+      let html = `<h3>Order Items (#${orderId})</h3><ul style="list-style: none; padding: 0;">`;
+
+      items.forEach(i => {
+        // Removed: Quantity input fields
+        html += `
+          <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
+            <strong>${i.item_name}</strong><br>
+            ${i.quantity} x ${i.price}kr = ${i.quantity * i.price}kr
+          </li>
+        `;
+      });
+
+      html += `</ul><br><button onclick="loadOrders()">Back to My Orders</button>`;
+      ordersDiv.innerHTML = html;
     });
 }
 
