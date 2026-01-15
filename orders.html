@@ -3,160 +3,200 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Skane Tamil Sangam</title>
-  <center>
- <h1 style="color:rgb(71, 108, 255);">Skane Tamil Sangam</h1>
-  <h2 style="color:rgb(255, 71, 181);">Pongal event 2026</h2></center>
+  <title>Your Orders - STS</title>
   <style>
+    :root {
+      --primary: #007bff;
+      --bg: #f4f7f9;
+      --card: #ffffff;
+      --text: #333;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      padding: 10px;
-      background: #f7f7f7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 15px;
     }
 
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
 
-    h2 {
+    .header-box {
       text-align: center;
+      margin-bottom: 20px;
     }
 
-    input, button {
-      padding: 10px;
-      margin: 5px 0;
+    .search-section {
+      background: var(--card);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+
+    input {
       width: 100%;
-      max-width: 300px;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px; /* Prevents iOS zoom on focus */
       box-sizing: border-box;
-      border-radius: 5px;
-      border: 1px solid #ccc;
     }
 
-    button {
-      cursor: pointer;
-      background-color: #007bff;
+    button.primary-btn {
+      width: 100%;
+      background: var(--primary);
       color: white;
       border: none;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    .order {
-      background: #fff;
-      padding: 15px;
-      margin-bottom: 15px;
+      padding: 12px;
       border-radius: 8px;
-      border: 1px solid #ccc;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
     }
 
-    .order button {
-      margin: 5px 0;
-      width: 100%;
+    /* Receipt Card Style */
+    .receipt-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border-top: 4px solid var(--primary);
     }
 
-    input[type="number"] {
-      width: 60px;
-      padding: 5px;
-      margin: 5px 0;
+    .vendor-name {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 12px;
+      border-bottom: 1px dashed #ddd;
+      padding-bottom: 8px;
     }
 
-    @media(max-width: 500px){
-      .order button {
-        font-size: 16px;
-        padding: 10px;
-      }
-      input[type="number"] {
-        width: 100%;
-      }
+    /* Flexbox Table for Items */
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 0.95rem;
+    }
+
+    .item-info { flex: 2; }
+    .item-qty { flex: 1; text-align: center; color: #666; }
+    .item-price { flex: 1; text-align: right; font-weight: 500; }
+
+    .total-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 2px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      background: #e1f5fe;
+      color: #0288d1;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
     }
   </style>
 </head>
 <body>
- 
-<h2 style="text-align: left">My Orders</h2>
 
-<input id="phone" placeholder="Phone">
-<button onclick="loadOrders()">Load Orders</button>
+<div class="container">
+  <div class="header-box">
+    <h2 style="color: #476cff;">Skane Tamil Sangam</h2>
+    <h4 style="color: #ff47b5;">My Receipts</h4>
+  </div>
 
-<hr>
-<div id="orders"></div>
+  <div class="search-section">
+    <input type="tel" id="phone" placeholder="Enter 10-digit Phone Number">
+    <button class="primary-btn" onclick="loadOrders()">View My Receipts</button>
+  </div>
+
+  <div id="orders"></div>
+</div>
 
 <script>
-const API =
-  window.location.hostname === "localhost"
+  const API = window.location.hostname === "localhost"
     ? "http://localhost:3000"
     : "https://food-pre-order-backend.onrender.com";
 
-const ordersDiv = document.getElementById("orders");
+  const ordersDiv = document.getElementById("orders");
 
-// auto-load from URL
-const params = new URLSearchParams(window.location.search);
-const phoneFromUrl = params.get("phone");
-if (phoneFromUrl) {
-  document.getElementById("phone").value = phoneFromUrl;
-  loadOrders();
-}
+  // Auto-load if phone is in URL
+  window.onload = () => {
+    const params = new URLSearchParams(window.location.search);
+    const phone = params.get("phone");
+    if (phone) {
+      document.getElementById("phone").value = phone;
+      loadOrders();
+    }
+  };
 
-// LOAD ORDERS (Simplified View)
-function loadOrders() {
-  const phone = document.getElementById("phone").value.trim();
-  if (!phone) {
-    alert("Enter phone number");
-    return;
-  }
+  async function loadOrders() {
+    const phone = document.getElementById("phone").value.trim();
+    if (!phone) return alert("Please enter your phone number");
 
-  fetch(`${API}/orders/${phone}`)
-    .then(res => res.json())
-    .then(data => {
+    try {
+      const res = await fetch(`${API}/orders/${phone}`);
+      const data = await res.json();
+      
       ordersDiv.innerHTML = "";
       if (data.length === 0) {
-        ordersDiv.innerHTML = "<p>No orders found</p>";
+        ordersDiv.innerHTML = `<div style="text-align:center; padding:20px;">No orders found for this number.</div>`;
         return;
       }
 
-      data.forEach(o => {
-        // Create a container for each vendor order
-        const orderCard = document.createElement("div");
-        orderCard.className = "order";
-        orderCard.innerHTML = `
-          <h3 style="margin-top:0; color:#007bff;">${o.vendor}</h3>
-          <div id="details_${o.id}">Loading items...</div>
-          <hr>
-          <p style="text-align:right;"><strong>Total Amount Paid: ${o.total}kr</strong></p>
+      for (const order of data) {
+        const card = document.createElement("div");
+        card.className = "receipt-card";
+        card.innerHTML = `
+          <div class="vendor-name">${order.vendor}</div>
+          <div id="items_${order.id}" style="min-height: 40px;">
+            <p style="color: #999; font-size: 0.8rem;">Loading items...</p>
+          </div>
+          <div class="total-section">
+            <span>Total Paid</span>
+            <span>₹${order.total}</span>
+          </div>
         `;
-        ordersDiv.appendChild(orderCard);
+        ordersDiv.appendChild(card);
+        fetchItems(order.id);
+      }
+    } catch (err) {
+      alert("Error loading orders. Check your connection.");
+    }
+  }
 
-        // Immediately fetch items for this order to show them inline
-        fetchItemsInline(o.id);
-      });
-    })
-    .catch(err => {
+  async function fetchItems(orderId) {
+    try {
+      const res = await fetch(`${API}/order/${orderId}/details`);
+      const items = await res.json();
+      const container = document.getElementById(`items_${orderId}`);
+      
+      container.innerHTML = items.map(i => `
+        <div class="item-row">
+          <div class="item-info">${i.item_name}</div>
+          <div class="item-qty">x${i.quantity}</div>
+          <div class="item-price">₹${i.price * i.quantity}</div>
+        </div>
+      `).join('');
+    } catch (err) {
       console.error(err);
-      alert("Failed to load orders");
-    });
-}
-
-// Fetch items and display them directly under the vendor name
-function fetchItemsInline(orderId) {
-  fetch(`${API}/order/${orderId}/details`)
-    .then(res => res.json())
-    .then(items => {
-      const detailsDiv = document.getElementById(`details_${orderId}`);
-      let itemsHtml = '<table style="width:100%; border-collapse: collapse; font-size: 0.9rem;">';
-      
-      items.forEach(i => {
-        itemsHtml += `
-          <tr>
-            <td style="padding: 5px 0;">${i.item_name}</td>
-            <td style="padding: 5px 0; text-align:right;">${i.quantity} qty</td>
-            <td style="padding: 5px 0; text-align:right;">${i.quantity * i.price}kr</td>
-          </tr>
-        `;
-      });
-      
-      itemsHtml += '</table>';
-      detailsDiv.innerHTML = itemsHtml;
-    });
-}
+    }
+  }
 </script>
 
 </body>
