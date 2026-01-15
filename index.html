@@ -197,10 +197,11 @@ function renderCart(){
   <div>
     <strong>${vCart.vendor}</strong><br>
     ${itemsHtml}<br>
-    <em>Total: ${total}kr | Contact Phone: ${vCart.vendor_phone} | Swish: ${vCart.vendor_swish || 'N/A'}</em>
+    <em>Total: ₹${total} | Phone: ${vCart.vendor_phone} | Swish: ${vCart.vendor_swish}</em>
   </div>
   <hr>
 `;
+
     hasItems = true;
   }
 

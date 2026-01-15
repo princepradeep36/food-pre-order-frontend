@@ -34,6 +34,7 @@ fetch(`${API}/vendors`)
                 ${v.id},
                 '${v.name}',
                 '${v.phone}',
+                '${v.swish || ''}',
                 ${m.id},
                 '${m.item_name}',
                 ${m.price}
@@ -51,26 +52,22 @@ fetch(`${API}/vendors`)
   });
 
 // ADD TO CART
-function addToCart(vendorId, vendorName, vendorPhone, itemId, itemName, price) {
-
+function addToCart(vendorId, vendorName, vendorPhone, vendorSwish, itemId, itemName, price) {
   const qtyInput = document.getElementById(`q_${itemId}`);
   const qty = Number(qtyInput.value);
 
-  if (qty <= 0) {
-    alert("Quantity must be at least 1");
-    return;
-  }
+  if (qty <= 0) return alert("Enter valid quantity");
 
   if (!cart[vendorId]) {
     cart[vendorId] = {
       vendor: vendorName,
       vendor_phone: vendorPhone,
+      vendor_swish: vendorSwish, // store swish
       items: []
     };
   }
 
   const existing = cart[vendorId].items.find(i => i.id === itemId);
-
   if (existing) {
     existing.quantity += qty;
   } else {
@@ -84,6 +81,7 @@ function addToCart(vendorId, vendorName, vendorPhone, itemId, itemName, price) {
 
   renderCart();
 }
+
 
 // RENDER CART
 function renderCart() {
