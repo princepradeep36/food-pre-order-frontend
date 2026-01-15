@@ -2,276 +2,316 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Skane Tamil Sangam</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>STS Food Pre-Order</title>
   <style>
+    :root {
+      --primary: #007bff;
+      --secondary: #ff47b5;
+      --success: #28a745;
+      --bg: #f8f9fa;
+      --text: #2d3436;
+      --card: #ffffff;
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
       margin: 0;
-      padding: 10px;
-      background: #f7f7f7;
+      padding: 0;
+      padding-bottom: 100px; /* Space for fixed footer */
     }
 
-    h1, h2, h3, h4 {
-      text-align: center;
-      margin: 5px 0;
-    }
-    
-
-    input, button {
-      padding: 10px;
-      margin: 5px 0;
-      width: 100%;
-      max-width: 300px;
-      box-sizing: border-box;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-    }
-
-    button {
-      cursor: pointer;
-      background-color: #007bff;
+    /* Header Styling */
+    .app-header {
+      background: linear-gradient(135deg, var(--primary), #0056b3);
       color: white;
-      border: none;
+      padding: 25px 15px;
+      text-align: center;
+      border-radius: 0 0 25px 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    button:hover {
-      background-color: #0056b3;
-    }
+    .app-header h1 { margin: 0; font-size: 1.5rem; }
+    .app-header p { margin: 5px 0 0; opacity: 0.9; font-size: 0.9rem; }
 
-    .vendor {
-      background: #fff;
+    .container { max-width: 600px; margin: 0 auto; padding: 15px; }
+
+    /* Customer Info Section */
+    .user-box {
+      background: var(--card);
       padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      border-radius: 15px;
+      margin-top: -20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input {
+      padding: 12px;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      font-size: 16px;
+      background: #fdfdfd;
+    }
+
+    /* Vendor Card Styling */
+    .vendor-card {
+      background: var(--card);
+      border-radius: 18px;
+      margin-top: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .vendor-header {
+      background: #f1f4f8;
+      padding: 12px 18px;
+      font-weight: bold;
+      color: var(--primary);
+      border-bottom: 1px solid #eee;
     }
 
     .menu-item {
       display: flex;
-      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      margin: 5px 0;
-      border-bottom: 1px dashed #ccc;
-      padding-bottom: 5px;
+      padding: 15px 18px;
+      border-bottom: 1px solid #f9f9f9;
     }
 
-    .menu-item div {
-      margin-bottom: 5px;
+    .item-detail h4 { margin: 0; font-size: 1rem; }
+    .item-detail span { color: var(--success); font-weight: bold; font-size: 0.9rem; }
+
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .menu-item input[type="number"] {
-      width: 60px;
+    .qty-input {
+      width: 50px;
+      text-align: center;
       padding: 5px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
     }
 
-    #cart {
-      background: #fff;
-      padding: 15px;
+    .btn-add {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 15px;
       border-radius: 8px;
-      margin-top: 20px;
-      border: 1px solid #ccc;
+      font-weight: bold;
+      cursor: pointer;
     }
 
-    #cart div {
-      margin-bottom: 10px;
+    /* Cart/Payment Styling */
+    .cart-section {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 15px;
+      margin-top: 25px;
+      border: 1px solid #e0e0e0;
     }
 
-    @media(max-width: 500px){
-      .menu-item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .menu-item button {
-        width: 100%;
-        margin-left: 0;
-        margin-top: 5px;
-      }
+    .vendor-pay-block {
+      border-left: 4px solid orange;
+      padding-left: 12px;
+      margin-bottom: 15px;
+    }
+
+    .pay-btn {
+      background: #ff9800;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      margin-top: 5px;
+      cursor: pointer;
+    }
+
+    /* Fixed Bottom Action Bar */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 15px;
+      box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+      display: flex;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .btn-checkout {
+      flex: 2;
+      background: var(--success);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .btn-checkout:disabled { background: #ccc; }
+
+    .btn-my-orders {
+      flex: 1;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.8rem;
     }
   </style>
 </head>
 <body>
 
-<center>
-<h1 style="color:rgb(71, 108, 255);">Skane Tamil Sangam</h1>
-<h2 style="color:rgb(255, 71, 181);">Pongal event 2026</h2>
-<h3 style="color:Tomato;">Snacks Pre-Order App</h3>
-</center>
+<header class="app-header">
+  <h1>Skane Tamil Sangam</h1>
+  <p>Pongal 2026 • Food Pre-Order</p>
+</header>
 
-<h4 style="text-align: left;">
-  Each item will be added to the below cart, Please check the cart at the bottom after adding the item
-</h4>
+<div class="container">
+  <div class="user-box">
+    <input type="text" id="name" placeholder="Full Name">
+    <input type="tel" id="phone" placeholder="10-digit Phone Number">
+  </div>
 
-<!-- CUSTOMER INFO -->
-<input id="name" placeholder="Name" required>
-<input id="phone" placeholder="Phone" type="tel" pattern="[0-9]{10}" required title="Enter a 10-digit phone number">
+  <h3 style="margin-top: 30px; padding-left: 5px;">Menu</h3>
+  <div id="vendors">
+    </div>
 
-<!-- MY ORDERS LINK -->
-<button onclick="openOrders()">My Orders</button>
+  <div id="cart-container" class="cart-section">
+    <h3 style="margin-top:0">Your Cart</h3>
+    <div id="cart">Cart is empty</div>
+  </div>
+</div>
 
-<hr>
-
-<h2>Menu</h2>
-<div id="vendors"></div>
-
-<h2>Cart</h2>
-<div id="cart">Cart is empty</div>
-<button onclick="checkout()">Checkout</button>
+<div class="bottom-bar">
+  <button class="btn-my-orders" onclick="openOrders()">My Receipts</button>
+  <button class="btn-checkout" id="checkoutBtn" onclick="checkout()" disabled>Confirm Order</button>
+</div>
 
 <script>
-const API =
-  window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://food-pre-order-backend.onrender.com";
+const API = window.location.hostname === "localhost"
+  ? "http://localhost:3000"
+  : "https://food-pre-order-backend.onrender.com";
 
-    const vendors = document.getElementById("vendors");
+let cart = {};
 
-
-let cart = {}; // cart[vendorId] = { vendor, vendor_phone, items: [{id,item_name,price,quantity}] }
-
-function loadVendors(){
-  fetch(`${API}/vendors`)
-    .then(res=>res.json())
-    .then(data=>{
-      const container = document.getElementById("vendors");
-      container.innerHTML = "";
-      data.forEach(v=>{
-        const div = document.createElement("div");
-        div.className = "vendor";
-
-        let menuHtml = '';
-        v.menu.forEach(m=>{
-          menuHtml += `
-            <div class="menu-item">
-              <div>${m.item_name} -${m.price}kr</div>
-              <div>
-                Qty: <input type="number" min="1" value="1" id="qty_${m.id}">
-                <button onclick="addToCart(${v.id}, '${v.name}', '${v.phone}', '${v.swish}', ${m.id}, '${m.item_name}', ${m.price})">Add</button>
-              </div>
+// LOAD VENDORS
+fetch(`${API}/vendors`)
+  .then(res => res.json())
+  .then(vendors => {
+    const container = document.getElementById("vendors");
+    container.innerHTML = vendors.map(v => `
+      <div class="vendor-card">
+        <div class="vendor-header">${v.name}</div>
+        ${v.menu.map(m => `
+          <div class="menu-item">
+            <div class="item-detail">
+              <h4>${m.item_name}</h4>
+              <span>₹${m.price}</span>
             </div>
-          `;
-        });
+            <div class="item-actions">
+              <input type="number" class="qty-input" value="1" min="1" id="qty_${m.id}">
+              <button class="btn-add" onclick="addToCart(${v.id},'${v.name}','${v.phone}','${v.swish}',${m.id},'${m.item_name}',${m.price})">Add</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  });
 
-        div.innerHTML = `<h3>${v.name} (${v.phone}) - Swish: ${v.swish }</h3>${menuHtml}`;
+function addToCart(vId, vName, vPhone, vSwish, mId, mName, price) {
+  const qty = Number(document.getElementById(`qty_${mId}`).value);
+  if(qty <= 0) return;
 
-        container.appendChild(div);
-      });
-    });
-}
-
-function addToCart(vendorId, vendorName, vendorPhone, vendorSwish, itemId, itemName, price){
-  const qty = Number(document.getElementById(`qty_${itemId}`).value);
-  if(qty <= 0) return alert("Enter valid quantity");
-
-  if(!cart[vendorId]){
-    cart[vendorId] = { 
-      vendor: vendorName, 
-      vendor_phone: vendorPhone, 
-      vendor_swish: vendorSwish, 
-      items: [],
-      paid: false // Initial status
-    };
+  if(!cart[vId]) {
+    cart[vId] = { vendor: vName, phone: vPhone, swish: vSwish, items: [], paid: false };
   }
 
-  const existing = cart[vendorId].items.find(i=>i.id===itemId);
-  if(existing){
-    existing.quantity += qty;
-  } else {
-    cart[vendorId].items.push({ id:itemId, item_name:itemName, price, quantity:qty });
-  }
+  const existing = cart[vId].items.find(i => i.id === mId);
+  if(existing) existing.quantity += qty;
+  else cart[vId].items.push({ id: mId, item_name: mName, price, quantity: qty });
 
   renderCart();
 }
 
-function renderCart(){
-  const container = document.getElementById("cart");
-  // Find the checkout button - ensure your HTML button has an ID or unique selector
-  const checkoutBtn = document.querySelector("button[onclick='checkout()']");
-  container.innerHTML = "";
-
+function renderCart() {
+  const cartDiv = document.getElementById("cart");
+  const checkoutBtn = document.getElementById("checkoutBtn");
+  cartDiv.innerHTML = "";
+  
   let allPaid = true;
   let hasItems = false;
 
-  for(const vendorId in cart){
+  for(const vId in cart) {
     hasItems = true;
-    const vCart = cart[vendorId];
-    if (!vCart.paid) allPaid = false;
+    const vCart = cart[vId];
+    if(!vCart.paid) allPaid = false;
 
-    let total = 0;
-    const itemsHtml = vCart.items.map(i => {
-      total += i.price * i.quantity;
-      return `${i.item_name} x ${i.quantity} = ${i.price * i.quantity}kr`;
-    }).join('<br>');
+    const itemsText = vCart.items.map(i => `${i.item_name} (x${i.quantity})`).join(', ');
+    const total = vCart.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
 
-    container.innerHTML += `
-      <div style="padding: 10px; border: 1px solid ${vCart.paid ? '#28a745' : '#dc3545'}; margin-bottom: 10px; border-radius: 5px;">
-        <strong>${vCart.vendor}</strong> ${vCart.paid ? '✅' : '⚠️'}<br>
-        ${itemsHtml}<br>
-        <em>Total: ${total}kr | Swish: ${vCart.vendor_swish}</em><br>
-        ${!vCart.paid 
-          ? `<button onclick="confirmPaid(${vendorId})" style="background: orange; width: auto; margin-top: 5px;">I have Swished ${vCart.vendor}</button>` 
-          : '<span style="color: green;">Payment Confirmed</span>'}
+    cartDiv.innerHTML += `
+      <div class="vendor-pay-block" style="border-color: ${vCart.paid ? '#28a745' : '#ff9800'}">
+        <strong>${vCart.vendor}</strong> ${vCart.paid ? '✅' : ''}<br>
+        <small>${itemsText}</small><br>
+        <strong>Total: ₹${total}</strong><br>
+        ${!vCart.paid ? 
+          `<button class="pay-btn" onclick="confirmPaid(${vId})">Swish ₹${total} to ${vCart.swish} & Mark Paid</button>` 
+          : '<small style="color:green">Payment marked</small>'}
       </div>
     `;
   }
 
   if(!hasItems) {
-    container.innerHTML = "Cart is empty";
+    cartDiv.innerHTML = "Cart is empty";
     checkoutBtn.disabled = true;
   } else {
-    // Disable checkout until allPaid is true
     checkoutBtn.disabled = !allPaid;
-    checkoutBtn.style.opacity = allPaid ? "1" : "0.5";
   }
 }
 
-function confirmPaid(vendorId) {
-  cart[vendorId].paid = true;
-  renderCart();
+function confirmPaid(vId) {
+  if(confirm("Confirm you have sent the Swish payment?")) {
+    cart[vId].paid = true;
+    renderCart();
+  }
 }
 
-function checkout(){
-  // Final safety check
-  const allPaid = Object.values(cart).every(v => v.paid);
-  if(!allPaid) return alert("Please pay all vendors via Swish first!");
-
+function checkout() {
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
 
-  if(!name || !/^\d{10}$/.test(phone)) return alert("Enter Name and 10-digit Phone");
+  if(!name || !/^\d{10}$/.test(phone)) return alert("Please enter valid Name and 10-digit Phone");
 
   fetch(`${API}/order`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ name, phone, cart })
   })
   .then(res => res.json())
-  .then(data => {
-    alert("Order Confirmed! You can view it in 'My Orders'.");
-    cart = {};
-    renderCart();
-    // Optional: redirect to orders page
+  .then(() => {
+    alert("Success! Redirecting to your receipts.");
     window.location.href = `orders.html?phone=${phone}`;
   });
 }
 
-function openOrders(){
-  const name = document.getElementById("name").value.trim();
+function openOrders() {
   const phone = document.getElementById("phone").value.trim();
-
-  // Validate before opening orders
-  if(!name) return alert("Name is required");
-  if(!phone) return alert("Phone is required");
-  if(!/^\d{10}$/.test(phone)) return alert("Phone number must be 10 digits");
-
+  if(!phone) return alert("Enter your phone number first");
   window.location.href = `orders.html?phone=${phone}`;
 }
-
-loadVendors();
 </script>
-
 </body>
 </html>

@@ -3,92 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Skane Tamil Sangam</title>
+  <title>Vendor Summary - STS</title>
   <style>
+    :root {
+      --primary: #007bff;
+      --accent: #ff47b5;
+      --bg: #f0f2f5;
+      --card: #ffffff;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      padding: 10px;
-      background: #f7f7f7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
       margin: 0;
+      padding: 15px;
+      color: #333;
     }
 
-    h1, h2, h3 {
+    header {
       text-align: center;
-      margin: 5px 0;
+      margin-bottom: 30px;
     }
 
-    h1 { color: rgb(71, 108, 255); font-size: 1.8rem; }
-    h2 { color: rgb(255, 71, 181); font-size: 1.5rem; }
-    h3 { color: tomato; font-size: 1.2rem; }
+    h1 { color: var(--primary); font-size: 1.5rem; margin: 0; }
+    h2 { color: #555; font-size: 1rem; margin: 5px 0; font-weight: normal; }
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-bottom: 20px;
-      background: #fff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
+    /* Summary Card */
+    .vendor-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vendor-header {
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+
+    .vendor-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: var(--primary);
+      display: block;
+    }
+
+    .vendor-contact {
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    /* Stats Row */
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f9f9f9;
+    }
+
+    .item-name {
+      font-weight: 500;
+      flex: 2;
+    }
+
+    .item-qty {
+      background: #e7f3ff;
+      color: var(--primary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-right: 10px;
+    }
+
+    .item-amount {
+      font-weight: bold;
+      color: #28a745;
+    }
+
+    .grand-total {
+      margin-top: auto;
+      padding-top: 15px;
+      text-align: right;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
       text-align: center;
-      word-wrap: break-word;
+      padding: 50px;
+      color: #999;
     }
 
-    th {
-      background-color: #007bff;
-      color: white;
-    }
-
-    @media(max-width: 600px) {
-      h1 { font-size: 1.5rem; }
-      h2 { font-size: 1.2rem; }
-      h3 { font-size: 1rem; }
-
-      table, thead, tbody, th, td, tr {
-        display: block;
-        width: 100%;
-      }
-
-      th { display: none; }
-
-      td {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px;
-        border: 1px solid #ccc;
-        margin-bottom: 5px;
-      }
-
-      td::before {
-        content: attr(data-label);
-        font-weight: bold;
-      }
-
-      tr {
-        margin-bottom: 10px;
-        border-bottom: 2px solid #eee;
+    @media (max-width: 400px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
 
-<h1>Skane Tamil Sangam</h1>
-<h2>Pongal Event 2026</h2>
-<h3>Snacks Pre-Order App</h3>
+<header>
+  <h1>Skane Tamil Sangam</h1>
+  <h2>Overall Event Sales Summary (Pongal 2026)</h2>
+</header>
 
-<h2>Vendor Dashboard - Overall Order Summary</h2>
-<div id="summary"></div>
+<div id="summary" class="dashboard-grid">
+  <div class="empty-state">Loading order totals...</div>
+</div>
 
 <script>
-const API =
-  window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://food-pre-order-backend.onrender.com";
+const API = window.location.hostname === "localhost"
+  ? "http://localhost:3000"
+  : "https://food-pre-order-backend.onrender.com";
 
 const summaryDiv = document.getElementById("summary");
 
@@ -97,46 +139,59 @@ function loadSummary() {
     .then(res => res.json())
     .then(data => {
       if (data.length === 0) {
-        summaryDiv.innerHTML = "<p>No orders found</p>";
+        summaryDiv.innerHTML = '<div class="empty-state">No orders have been placed yet.</div>';
         return;
       }
 
+      // Group data by vendor name
       const vendors = {};
       data.forEach(row => {
-        if (!vendors[row.vendor_id]) {
-          vendors[row.vendor_id] = { name: row.vendor_name, phone: row.vendor_phone, items: [] };
+        const key = row.vendor_name;
+        if (!vendors[key]) {
+          vendors[key] = { 
+            name: row.vendor_name, 
+            phone: row.phone, 
+            items: [],
+            grand_total: 0 
+          };
         }
-        vendors[row.vendor_id].items.push(row);
+        if (row.item_name) {
+          vendors[key].items.push(row);
+          vendors[key].grand_total += Number(row.total_amount || 0);
+        }
       });
 
       summaryDiv.innerHTML = "";
       Object.values(vendors).forEach(v => {
-        let html = `<h3>${v.name} (${v.phone})</h3>`;
-        html += `<table>
-          <thead>
-            <tr>
-              <th>Item Name</th>
-              <th>Total Quantity</th>
-              <th>Total Amount</th>
-            </tr>
-          </thead>
-          <tbody>`;
+        const card = document.createElement("div");
+        card.className = "vendor-card";
 
-        v.items.forEach(i => {
-          html += `<tr>
-            <td data-label="Item Name">${i.item_name}</td>
-            <td data-label="Total Quantity">${i.total_quantity || 0}</td>
-            <td data-label="Total Amount">${i.total_amount || 0}kr</td>
-          </tr>`;
-        });
+        const itemsHtml = v.items.map(i => `
+          <div class="item-row">
+            <span class="item-name">${i.item_name}</span>
+            <span class="item-qty">x${i.total_quantity}</span>
+            <span class="item-amount">₹${i.total_amount}</span>
+          </div>
+        `).join('');
 
-        html += "</tbody></table>";
-        summaryDiv.innerHTML += html;
+        card.innerHTML = `
+          <div class="vendor-header">
+            <span class="vendor-title">${v.name}</span>
+            <span class="vendor-contact">${v.phone}</span>
+          </div>
+          <div class="item-list">
+            ${itemsHtml || '<p style="color:#ccc">No items ordered</p>'}
+          </div>
+          <div class="grand-total">
+            Total Sales: ₹${v.grand_total}
+          </div>
+        `;
+        summaryDiv.appendChild(card);
       });
     })
     .catch(err => {
       console.error(err);
-      summaryDiv.innerHTML = "<p>Error loading summary</p>";
+      summaryDiv.innerHTML = '<div class="empty-state">Error connecting to server.</div>';
     });
 }
 
