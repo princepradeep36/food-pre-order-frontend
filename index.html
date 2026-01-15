@@ -162,12 +162,12 @@ function loadVendors(){
     });
 }
 
-function addToCart(vendorId, vendorName, vendorPhone, itemId, itemName, price){
+function addToCart(vendorId, vendorName, vendorPhone, vendorSwish, itemId, itemName, price){
   const qty = Number(document.getElementById(`qty_${itemId}`).value);
   if(qty <= 0) return alert("Enter valid quantity");
 
   if(!cart[vendorId]){
-    cart[vendorId] = { vendor: vendorName, vendor_phone: vendorPhone, items: [] };
+    cart[vendorId] = { vendor: vendorName, vendor_phone: vendorPhone, vendor_swish: vendorSwish, items: [] };
   }
 
   const existing = cart[vendorId].items.find(i=>i.id===itemId);
