@@ -85,6 +85,7 @@
   <h3>Add Vendor</h3>
   <input id="vname" placeholder="Vendor Name">
   <input id="vphone" placeholder="Vendor Phone">
+  <input id="vswish" placeholder="Vendor Swish">
   <button onclick="addVendor()">Add Vendor</button>
 </div>
 
@@ -145,12 +146,13 @@ function loadVendors() {
 function addVendor() {
   const name = vname.value.trim();
   const phone = vphone.value.trim();
-  if (!name || !phone) return alert("Enter vendor name and phone");
+  const swish = vswish.value.trim();
+  if (!name || !phone || !swish) return alert("Enter vendor name ,phone and swish details");
 
   fetch(`${API}/admin/vendor`, {
     method: "POST",
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, phone })
+    body: JSON.stringify({ name, phone, swish })
   })
   .then(res => res.ok ? loadVendors() : res.text().then(txt => alert(txt)));
 }
