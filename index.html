@@ -167,7 +167,13 @@ function addToCart(vendorId, vendorName, vendorPhone, vendorSwish, itemId, itemN
   if(qty <= 0) return alert("Enter valid quantity");
 
   if(!cart[vendorId]){
-    cart[vendorId] = { vendor: vendorName, vendor_phone: vendorPhone, vendor_swish: vendorSwish, items: [] };
+    cart[vendorId] = { 
+      vendor: vendorName, 
+      vendor_phone: vendorPhone, 
+      vendor_swish: vendorSwish, 
+      items: [],
+      paid: false // Initial status
+    };
   }
 
   const existing = cart[vendorId].items.find(i=>i.id===itemId);
@@ -182,53 +188,73 @@ function addToCart(vendorId, vendorName, vendorPhone, vendorSwish, itemId, itemN
 
 function renderCart(){
   const container = document.getElementById("cart");
+  // Find the checkout button - ensure your HTML button has an ID or unique selector
+  const checkoutBtn = document.querySelector("button[onclick='checkout()']");
   container.innerHTML = "";
 
+  let allPaid = true;
   let hasItems = false;
+
   for(const vendorId in cart){
+    hasItems = true;
     const vCart = cart[vendorId];
+    if (!vCart.paid) allPaid = false;
+
     let total = 0;
-    const itemsHtml = vCart.items.map(i=>{
-      total += i.price*i.quantity;
-      return `${i.item_name} x ${i.quantity} = ${i.price*i.quantity}kr`;
+    const itemsHtml = vCart.items.map(i => {
+      total += i.price * i.quantity;
+      return `${i.item_name} x ${i.quantity} = ${i.price * i.quantity}kr`;
     }).join('<br>');
 
     container.innerHTML += `
-  <div>
-    <strong>${vCart.vendor}</strong><br>
-    ${itemsHtml}<br>
-    <em>Total: ₹${total} | Phone: ${vCart.vendor_phone} | Swish: ${vCart.vendor_swish}</em>
-  </div>
-  <hr>
-`;
-
-    hasItems = true;
+      <div style="padding: 10px; border: 1px solid ${vCart.paid ? '#28a745' : '#dc3545'}; margin-bottom: 10px; border-radius: 5px;">
+        <strong>${vCart.vendor}</strong> ${vCart.paid ? '✅' : '⚠️'}<br>
+        ${itemsHtml}<br>
+        <em>Total: ${total}kr | Swish: ${vCart.vendor_swish}</em><br>
+        ${!vCart.paid 
+          ? `<button onclick="confirmPaid(${vendorId})" style="background: orange; width: auto; margin-top: 5px;">I have Swished ${vCart.vendor}</button>` 
+          : '<span style="color: green;">Payment Confirmed</span>'}
+      </div>
+    `;
   }
 
-  if(!hasItems) container.innerHTML = "Cart is empty";
+  if(!hasItems) {
+    container.innerHTML = "Cart is empty";
+    checkoutBtn.disabled = true;
+  } else {
+    // Disable checkout until allPaid is true
+    checkoutBtn.disabled = !allPaid;
+    checkoutBtn.style.opacity = allPaid ? "1" : "0.5";
+  }
+}
+
+function confirmPaid(vendorId) {
+  cart[vendorId].paid = true;
+  renderCart();
 }
 
 function checkout(){
-  if(Object.keys(cart).length===0) return alert("Cart is empty");
+  // Final safety check
+  const allPaid = Object.values(cart).every(v => v.paid);
+  if(!allPaid) return alert("Please pay all vendors via Swish first!");
 
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
 
-  // Validate name and phone
-  if(!name) return alert("Name is required");
-  if(!phone) return alert("Phone is required");
-  if(!/^\d{10}$/.test(phone)) return alert("Phone number must be 10 digits");
+  if(!name || !/^\d{10}$/.test(phone)) return alert("Enter Name and 10-digit Phone");
 
   fetch(`${API}/order`, {
-    method:"POST",
-    headers: {"Content-Type":"application/json"},
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, phone, cart })
   })
-  .then(res=>res.json())
-  .then(data=>{
-    alert("Order placed!");
+  .then(res => res.json())
+  .then(data => {
+    alert("Order Confirmed! You can view it in 'My Orders'.");
     cart = {};
     renderCart();
+    // Optional: redirect to orders page
+    window.location.href = `orders.html?phone=${phone}`;
   });
 }
 
