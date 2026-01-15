@@ -149,7 +149,7 @@ function loadVendors(){
               <div>${m.item_name} -${m.price}kr</div>
               <div>
                 Qty: <input type="number" min="1" value="1" id="qty_${m.id}">
-                <button onclick="addToCart(${v.id}, '${v.name}', '${v.phone}', ${m.id}, '${m.item_name}', ${m.price})">Add</button>
+                <button onclick="addToCart(${v.id}, '${v.name}', '${v.phone}', '${v.swish}', ${m.id}, '${m.item_name}', ${m.price})">Add</button>
               </div>
             </div>
           `;
