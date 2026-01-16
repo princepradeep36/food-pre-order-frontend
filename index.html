@@ -209,6 +209,7 @@ const API = window.location.hostname === "localhost"
 let cart = {};
 
 // LOAD VENDORS
+// LOAD VENDORS
 fetch(`${API}/vendors`)
   .then(res => res.json())
   .then(vendors => {
@@ -224,7 +225,7 @@ fetch(`${API}/vendors`)
             </div>
             <div class="item-actions">
               <input type="number" class="qty-input" value="1" min="1" id="qty_${m.id}">
-              <button class="btn-add" onclick="addToCart(${v.id},'${v.name}','${v.phone}','${v.swish}',${m.id},'${m.item_name}',${m.price})">Add</button>
+              <button class="btn-add" onclick="addToCart(${v.id}, '${v.name.replace(/'/g, "\\'")}', '${v.phone}', '${v.swish}', ${m.id}, '${m.item_name.replace(/'/g, "\\'")}', ${m.price})">Add</button>
             </div>
           </div>
         `).join('')}
