@@ -220,7 +220,7 @@ fetch(`${API}/vendors`)
           <div class="menu-item">
             <div class="item-detail">
               <h4>${m.item_name}</h4>
-              <span>₹${m.price}</span>
+              <span>${m.price}kr</span>
             </div>
             <div class="item-actions">
               <input type="number" class="qty-input" value="1" min="1" id="qty_${m.id}">
@@ -280,7 +280,7 @@ function renderCart() {
             <span>${item.quantity}</span>
             <button onclick="updateCartQty(${vId}, ${item.id}, 1)" style="width:25px; border:1px solid #ddd; background:#fff;">+</button>
           </div>
-          <div style="flex: 1; text-align: right; font-weight:bold;">₹${lineTotal}</div>
+          <div style="flex: 1; text-align: right; font-weight:bold;">${lineTotal}kr</div>
           <button onclick="removeFromCart(${vId}, ${item.id})" style="margin-left:10px; background:none; border:none; color:red; cursor:pointer;">🗑️</button>
         </div>
       `;
@@ -304,7 +304,7 @@ function renderCart() {
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <strong style="font-size: 1rem;">Total: ₹${vendorTotal}</strong>
+          <strong style="font-size: 1rem;">Total: ${vendorTotal}kr</strong>
           ${!vCart.paid ? 
             `<button class="pay-btn" onclick="confirmPaid(${vId})" style="margin:0; padding: 10px 15px;">Confirm Payment</button>` : ''}
         </div>
