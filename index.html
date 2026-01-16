@@ -232,17 +232,23 @@ fetch(`${API}/vendors`)
   });
 
 function addToCart(vId, vName, vPhone, vSwish, mId, mName, price) {
-  const qty = Number(document.getElementById(`qty_${mId}`).value);
-  if(qty <= 0) return;
+  const qtyInput = document.getElementById(`qty_${mId}`);
+  const qty = Number(qtyInput.value);
+  if (qty <= 0) return;
 
-  if(!cart[vId]) {
+  if (!cart[vId]) {
     cart[vId] = { vendor: vName, phone: vPhone, swish: vSwish, items: [], paid: false };
   }
 
   const existing = cart[vId].items.find(i => i.id === mId);
-  if(existing) existing.quantity += qty;
-  else cart[vId].items.push({ id: mId, item_name: mName, price, quantity: qty });
+  if (existing) {
+    existing.quantity += qty;
+  } else {
+    cart[vId].items.push({ id: mId, item_name: mName, price, quantity: qty });
+  }
 
+  // Reset input after adding
+  qtyInput.value = 1;
   renderCart();
 }
 
@@ -254,32 +260,101 @@ function renderCart() {
   let allPaid = true;
   let hasItems = false;
 
-  for(const vId in cart) {
+  for (const vId in cart) {
     hasItems = true;
     const vCart = cart[vId];
-    if(!vCart.paid) allPaid = false;
+    if (!vCart.paid) allPaid = false;
 
-    const itemsText = vCart.items.map(i => `${i.item_name} (x${i.quantity})`).join(', ');
-    const total = vCart.items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+    let vendorTotal = 0;
+    
+    // Generate Item Rows
+    const itemsHtml = vCart.items.map((item) => {
+      const lineTotal = item.price * item.quantity;
+      vendorTotal += lineTotal;
+      return `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.9rem;">
+          <div style="flex: 2;">${item.item_name}</div>
+          <div style="flex: 1; display: flex; align-items: center; gap: 5px;">
+            <button onclick="updateCartQty(${vId}, ${item.id}, -1)" style="width:25px; border:1px solid #ddd; background:#fff;">-</button>
+            <span>${item.quantity}</span>
+            <button onclick="updateCartQty(${vId}, ${item.id}, 1)" style="width:25px; border:1px solid #ddd; background:#fff;">+</button>
+          </div>
+          <div style="flex: 1; text-align: right; font-weight:bold;">₹${lineTotal}</div>
+          <button onclick="removeFromCart(${vId}, ${item.id})" style="margin-left:10px; background:none; border:none; color:red; cursor:pointer;">🗑️</button>
+        </div>
+      `;
+    }).join('');
 
+    // Vendor Payment Block
     cartDiv.innerHTML += `
-      <div class="vendor-pay-block" style="border-color: ${vCart.paid ? '#28a745' : '#ff9800'}">
-        <strong>${vCart.vendor}</strong> ${vCart.paid ? '✅' : ''}<br>
-        <small>${itemsText}</small><br>
-        <strong>Total: ₹${total}</strong><br>
-        ${!vCart.paid ? 
-          `<button class="pay-btn" onclick="confirmPaid(${vId})">Swish ₹${total} to ${vCart.swish} & Mark Paid</button>` 
-          : '<small style="color:green">Payment marked</small>'}
+      <div class="vendor-pay-block" style="border-left: 4px solid ${vCart.paid ? '#28a745' : '#ff9800'}; padding: 12px; background: #fffdf9; margin-bottom: 20px; border-radius: 0 10px 10px 0; box-shadow: 2px 2px 5px rgba(0,0,0,0.05);">
+        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom: 5px;">
+           <strong style="font-size: 1.1rem; color: #333;">${vCart.vendor}</strong>
+           ${vCart.paid ? '<span style="color:green; font-weight:bold;">Paid ✅</span>' : '<span style="color:#e67e22; font-size:0.8rem; font-weight:bold;">Awaiting Payment</span>'}
+        </div>
+        
+        <div style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">
+          <span>📞 Contact: ${vCart.phone}</span><br>
+          <span style="color: #007bff; font-weight: bold;">💸 Swish: ${vCart.swish}</span>
+        </div>
+
+        <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 10px;">
+          ${itemsHtml}
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong style="font-size: 1rem;">Total: ₹${vendorTotal}</strong>
+          ${!vCart.paid ? 
+            `<button class="pay-btn" onclick="confirmPaid(${vId})" style="margin:0; padding: 10px 15px;">Confirm Payment</button>` : ''}
+        </div>
       </div>
     `;
   }
 
-  if(!hasItems) {
-    cartDiv.innerHTML = "Cart is empty";
+  if (!hasItems) {
+    cartDiv.innerHTML = "<p style='text-align:center; color:#999;'>Your cart is currently empty.</p>";
     checkoutBtn.disabled = true;
   } else {
     checkoutBtn.disabled = !allPaid;
   }
+}
+
+// Change quantity directly in the cart
+function updateCartQty(vId, mId, change) {
+  const vendor = cart[vId];
+  if (!vendor) return;
+
+  const item = vendor.items.find(i => i.id === mId);
+  if (item) {
+    item.quantity += change;
+    // If quantity hits 0, remove it automatically
+    if (item.quantity <= 0) {
+      removeFromCart(vId, mId);
+    } else {
+      renderCart();
+    }
+  }
+}
+
+// Remove an item entirely from a vendor's cart
+function removeFromCart(vId, mId) {
+  if (!cart[vId]) return;
+
+  cart[vId].items = cart[vId].items.filter(i => i.id !== mId);
+
+  // If vendor has no more items, remove the vendor block entirely
+  if (cart[vId].items.length === 0) {
+    delete cart[vId];
+  }
+
+  renderCart();
+}
+
+// Optional: Add this to your script to allow clicking numbers to copy them
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    alert("Swish number copied: " + text);
+  });
 }
 
 function confirmPaid(vId) {
