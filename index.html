@@ -20,7 +20,7 @@
       color: var(--text);
       margin: 0;
       padding: 0;
-      padding-bottom: 100px; /* Space for fixed footer */
+      padding-bottom: 100px;
     }
 
     /* Header Styling */
@@ -38,7 +38,6 @@
 
     .container { max-width: 600px; margin: 0 auto; padding: 15px; }
 
-    /* Customer Info Section */
     .user-box {
       background: var(--card);
       padding: 15px;
@@ -58,7 +57,6 @@
       background: #fdfdfd;
     }
 
-    /* Vendor Card Styling */
     .vendor-card {
       background: var(--card);
       border-radius: 18px;
@@ -86,11 +84,7 @@
     .item-detail h4 { margin: 0; font-size: 1rem; }
     .item-detail span { color: var(--success); font-weight: bold; font-size: 0.9rem; }
 
-    .item-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .item-actions { display: flex; align-items: center; gap: 8px; }
 
     .qty-input {
       width: 50px;
@@ -110,7 +104,7 @@
       cursor: pointer;
     }
 
-    /* Cart/Payment Styling */
+    /* Cart Section */
     .cart-section {
       background: var(--card);
       border-radius: 18px;
@@ -136,7 +130,7 @@
       cursor: pointer;
     }
 
-    /* Fixed Bottom Action Bar */
+    /* Bottom Bar */
     .bottom-bar {
       position: fixed;
       bottom: 0;
@@ -170,9 +164,78 @@
       border-radius: 12px;
       font-size: 0.8rem;
     }
+
+    /* --- FEEDBACK UI --- */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(40, 167, 69, 0.95);
+      color: white;
+      padding: 10px 25px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      z-index: 3000;
+      display: none;
+      font-weight: bold;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .floating-basket {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      background: var(--secondary);
+      color: white;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      display: none; 
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(255, 71, 181, 0.4);
+      cursor: pointer;
+      z-index: 2000;
+      transition: transform 0.2s;
+    }
+
+    .floating-basket:active { transform: scale(0.9); }
+
+    .basket-icon { font-size: 1.4rem; }
+    .basket-count {
+      font-size: 0.8rem;
+      font-weight: bold;
+      background: white;
+      color: var(--secondary);
+      padding: 1px 6px;
+      border-radius: 10px;
+      margin-top: -2px;
+    }
+
+    @keyframes slideDown {
+      from { transform: translate(-50%, -100px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    .pulse-animation { animation: pulse 0.3s ease-in-out; }
   </style>
 </head>
 <body>
+
+<div id="toast" class="toast">Item Added!</div>
+
+<div id="basket-btn" class="floating-basket" onclick="document.getElementById('cart-container').scrollIntoView({behavior: 'smooth'})">
+  <span class="basket-icon">🛒</span>
+  <span class="basket-count" id="total-qty">0</span>
+</div>
 
 <header class="app-header">
   <h1>Skane Tamil Sangam</h1>
@@ -185,10 +248,17 @@
     <input type="tel" id="phone" placeholder="10-digit Phone Number">
   </div>
   
+  <div id="sleep-message" style="display:none; background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 20px; border-radius: 15px; margin-top: 20px; text-align: center;">
+    <strong>Sorry, I am sleeping! 😴</strong>
+    <p>I will wake up in 2 minutes. Please refresh after 2 minutes.</p>
+    <button onclick="window.location.reload()" style="background:#856404; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">Refresh Now</button>
+  </div>
+
   <h3 style="margin-top: 30px; padding-left: 5px;">Menu</h3>
-  <h5 style="margin-top: 30px; padding-left: 5px;">Added items can be viewed in the cart located at the bottom of this page.</h5>
+  
   <div id="vendors">
-    </div>
+    <p style="text-align: center; padding: 20px; color: #666;">Connecting to server...</p>
+  </div>
 
   <div id="cart-container" class="cart-section">
     <h3 style="margin-top:0">Your Cart</h3>
@@ -209,11 +279,15 @@ const API = window.location.hostname === "localhost"
 let cart = {};
 
 // LOAD VENDORS
-// LOAD VENDORS
 fetch(`${API}/vendors`)
-  .then(res => res.json())
+  .then(res => {
+    if (!res.ok) throw new Error();
+    return res.json();
+  })
   .then(vendors => {
     const container = document.getElementById("vendors");
+    document.getElementById("sleep-message").style.display = "none";
+    
     container.innerHTML = vendors.map(v => `
       <div class="vendor-card">
         <div class="vendor-header">${v.name}</div>
@@ -231,6 +305,10 @@ fetch(`${API}/vendors`)
         `).join('')}
       </div>
     `).join('');
+  })
+  .catch(() => {
+    document.getElementById("vendors").innerHTML = "";
+    document.getElementById("sleep-message").style.display = "block";
   });
 
 function addToCart(vId, vName, vPhone, vSwish, mId, mName, price) {
@@ -249,28 +327,45 @@ function addToCart(vId, vName, vPhone, vSwish, mId, mName, price) {
     cart[vId].items.push({ id: mId, item_name: mName, price, quantity: qty });
   }
 
-  // Reset input after adding
+  // Visual feedback: Popup toast
+  showToast(`Added ${qty} x ${mName}`);
+  
+  // Basket pulse animation
+  const basket = document.getElementById("basket-btn");
+  basket.classList.remove("pulse-animation");
+  void basket.offsetWidth; // Restart CSS animation
+  basket.classList.add("pulse-animation");
+
   qtyInput.value = 1;
   renderCart();
+}
+
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.innerText = msg;
+  toast.style.display = "block";
+  setTimeout(() => { toast.style.display = "none"; }, 2000);
 }
 
 function renderCart() {
   const cartDiv = document.getElementById("cart");
   const checkoutBtn = document.getElementById("checkoutBtn");
-  cartDiv.innerHTML = "";
+  const basketBtn = document.getElementById("basket-btn");
+  const totalQtyLabel = document.getElementById("total-qty");
   
+  cartDiv.innerHTML = "";
   let allPaid = true;
   let hasItems = false;
+  let totalQty = 0;
 
   for (const vId in cart) {
     hasItems = true;
     const vCart = cart[vId];
     if (!vCart.paid) allPaid = false;
-
     let vendorTotal = 0;
-    
-    // Generate Item Rows
+
     const itemsHtml = vCart.items.map((item) => {
+      totalQty += item.quantity;
       const lineTotal = item.price * item.quantity;
       vendorTotal += lineTotal;
       return `
@@ -282,81 +377,61 @@ function renderCart() {
             <button onclick="updateCartQty(${vId}, ${item.id}, 1)" style="width:25px; border:1px solid #ddd; background:#fff;">+</button>
           </div>
           <div style="flex: 1; text-align: right; font-weight:bold;">${lineTotal}kr</div>
-          <button onclick="removeFromCart(${vId}, ${item.id})" style="margin-left:10px; background:none; border:none; color:red; cursor:pointer;">🗑️</button>
+          <button onclick="removeFromCart(${vId}, ${item.id})" style="margin-left:10px; background:none; border:none; cursor:pointer;">🗑️</button>
         </div>
       `;
     }).join('');
 
-    // Vendor Payment Block
     cartDiv.innerHTML += `
-      <div class="vendor-pay-block" style="border-left: 4px solid ${vCart.paid ? '#28a745' : '#ff9800'}; padding: 12px; background: #fffdf9; margin-bottom: 20px; border-radius: 0 10px 10px 0; box-shadow: 2px 2px 5px rgba(0,0,0,0.05);">
-        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom: 5px;">
-           <strong style="font-size: 1.1rem; color: #333;">${vCart.vendor}</strong>
-           ${vCart.paid ? '<span style="color:green; font-weight:bold;">Paid ✅</span>' : '<span style="color:#e67e22; font-size:0.8rem; font-weight:bold;">Awaiting Payment</span>'}
+      <div class="vendor-pay-block" style="border-left: 4px solid ${vCart.paid ? '#28a745' : '#ff9800'}; padding: 12px; background: #fffdf9; margin-bottom: 20px; border-radius: 0 10px 10px 0;">
+        <div style="display:flex; justify-content:space-between;">
+           <strong>${vCart.vendor}</strong>
+           ${vCart.paid ? '<span style="color:green; font-weight:bold;">Paid ✅</span>' : '<span style="color:#e67e22; font-weight:bold;">Waiting</span>'}
         </div>
-        
-        <div style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">
-          <span>📞 Contact: ${vCart.phone}</span><br>
-          <span style="color: #007bff; font-weight: bold;">💸 Swish: ${vCart.swish}</span>
-        </div>
-
+        <div style="font-size: 0.8rem; color: #666; margin: 5px 0;">Swish: ${vCart.swish}</div>
         <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 10px;">
           ${itemsHtml}
         </div>
-
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <strong style="font-size: 1rem;">Total: ${vendorTotal}kr</strong>
-          ${!vCart.paid ? 
-            `<button class="pay-btn" onclick="confirmPaid(${vId})" style="margin:0; padding: 10px 15px;">Confirm Payment</button>` : ''}
+          ${!vCart.paid ? `<button class="pay-btn" onclick="confirmPaid(${vId})">Confirm Payment</button>` : ''}
         </div>
       </div>
     `;
   }
 
+  // Floating Basket Visibility
+  if (totalQty > 0) {
+    totalQtyLabel.innerText = totalQty;
+    basketBtn.style.display = "flex";
+  } else {
+    basketBtn.style.display = "none";
+  }
+
   if (!hasItems) {
-    cartDiv.innerHTML = "<p style='text-align:center; color:#999;'>Your cart is currently empty.</p>";
+    cartDiv.innerHTML = "<p style='text-align:center; color:#999;'>Your basket is empty</p>";
     checkoutBtn.disabled = true;
   } else {
     checkoutBtn.disabled = !allPaid;
   }
 }
 
-// Change quantity directly in the cart
 function updateCartQty(vId, mId, change) {
   const vendor = cart[vId];
   if (!vendor) return;
-
   const item = vendor.items.find(i => i.id === mId);
   if (item) {
     item.quantity += change;
-    // If quantity hits 0, remove it automatically
-    if (item.quantity <= 0) {
-      removeFromCart(vId, mId);
-    } else {
-      renderCart();
-    }
+    if (item.quantity <= 0) removeFromCart(vId, mId);
+    else renderCart();
   }
 }
 
-// Remove an item entirely from a vendor's cart
 function removeFromCart(vId, mId) {
   if (!cart[vId]) return;
-
   cart[vId].items = cart[vId].items.filter(i => i.id !== mId);
-
-  // If vendor has no more items, remove the vendor block entirely
-  if (cart[vId].items.length === 0) {
-    delete cart[vId];
-  }
-
+  if (cart[vId].items.length === 0) delete cart[vId];
   renderCart();
-}
-
-// Optional: Add this to your script to allow clicking numbers to copy them
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    alert("Swish number copied: " + text);
-  });
 }
 
 function confirmPaid(vId) {
@@ -369,7 +444,6 @@ function confirmPaid(vId) {
 function checkout() {
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
-
   if(!name || !/^\d{10}$/.test(phone)) return alert("Please enter valid Name and 10-digit Phone");
 
   fetch(`${API}/order`, {
@@ -379,7 +453,7 @@ function checkout() {
   })
   .then(res => res.json())
   .then(() => {
-    alert("Success! Redirecting to your receipts.");
+    alert("Order Successful!");
     window.location.href = `orders.html?phone=${phone}`;
   });
 }
