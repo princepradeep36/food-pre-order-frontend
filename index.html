@@ -383,25 +383,33 @@ function renderCart() {
       `;
     }).join('');
 
+    // --- Updated UI Block ---
     cartDiv.innerHTML += `
-      <div class="vendor-pay-block" style="border-left: 4px solid ${vCart.paid ? '#28a745' : '#ff9800'}; padding: 12px; background: #fffdf9; margin-bottom: 20px; border-radius: 0 10px 10px 0;">
-        <div style="display:flex; justify-content:space-between;">
-           <strong>${vCart.vendor}</strong>
-           ${vCart.paid ? '<span style="color:green; font-weight:bold;">Paid ✅</span>' : '<span style="color:#e67e22; font-weight:bold;">Waiting</span>'}
+      <div class="vendor-pay-block" style="border-left: 4px solid ${vCart.paid ? '#28a745' : '#ff9800'}; padding: 12px; background: #fffdf9; margin-bottom: 20px; border-radius: 0 10px 10px 0; box-shadow: 2px 2px 5px rgba(0,0,0,0.05);">
+        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom: 5px;">
+           <strong style="font-size: 1.1rem; color: #333;">${vCart.vendor}</strong>
+           ${vCart.paid ? '<span style="color:green; font-weight:bold;">Paid ✅</span>' : '<span style="color:#e67e22; font-size:0.8rem; font-weight:bold;">Awaiting Payment</span>'}
         </div>
-        <div style="font-size: 0.8rem; color: #666; margin: 5px 0;">Swish: ${vCart.swish}</div>
+        
+        <div style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">
+          <span>📞 Contact: ${vCart.phone}</span><br>
+          <span style="color: #007bff; font-weight: bold;">💸 Swish: ${vCart.swish}</span>
+        </div>
+
         <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 10px;">
           ${itemsHtml}
         </div>
+
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <strong style="font-size: 1rem;">Total: ${vendorTotal}kr</strong>
-          ${!vCart.paid ? `<button class="pay-btn" onclick="confirmPaid(${vId})">Confirm Payment</button>` : ''}
+          ${!vCart.paid ? 
+            `<button class="pay-btn" onclick="confirmPaid(${vId})" style="margin:0; padding: 10px 15px;">Confirm Payment</button>` : ''}
         </div>
       </div>
     `;
   }
 
-  // Floating Basket Visibility
+  // Floating Basket Visibility Logic
   if (totalQty > 0) {
     totalQtyLabel.innerText = totalQty;
     basketBtn.style.display = "flex";
