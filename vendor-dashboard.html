@@ -170,7 +170,7 @@ function loadSummary() {
           <div class="item-row">
             <span class="item-name">${i.item_name}</span>
             <span class="item-qty">x${i.total_quantity}</span>
-            <span class="item-amount">₹${i.total_amount}</span>
+            <span class="item-amount">${i.total_amount}kr</span>
           </div>
         `).join('');
 
@@ -183,7 +183,7 @@ function loadSummary() {
             ${itemsHtml || '<p style="color:#ccc">No items ordered</p>'}
           </div>
           <div class="grand-total">
-            Total Sales: ₹${v.grand_total}
+            Total Sales: ${v.grand_total}kr
           </div>
         `;
         summaryDiv.appendChild(card);
