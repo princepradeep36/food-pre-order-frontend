@@ -455,10 +455,11 @@ function checkout() {
   const phone = document.getElementById("phone").value.trim();
   if(!name || !/^\d{10}$/.test(phone)) return alert("Please enter valid Name and 10-digit Phone");
 
+  // Create a version of the cart that includes the payment status for each vendor
   fetch(`${API}/order`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ name, phone, cart })
+    body: JSON.stringify({ name, phone, cart }) // cart already contains the .paid boolean
   })
   .then(res => res.json())
   .then(() => {
