@@ -5,210 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vendor Dashboard - STS</title>
   <style>
-    :root {
-      --primary: #007bff;
-      --secondary: #ff47b5;
-      --bg: #f8f9fa;
-      --card-bg: #ffffff;
-      --success: #28a745;
-      --warning: #ffc107;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      margin: 0;
-      padding: 15px;
-      color: #333;
-    }
-
+    :root { --primary: #007bff; --secondary: #ff47b5; --bg: #f8f9fa; --card-bg: #ffffff; --success: #28a745; --warning: #ffc107; }
+    body { font-family: sans-serif; background-color: var(--bg); padding: 15px; }
     header { text-align: center; margin-bottom: 25px; }
-    h1 { color: var(--primary); font-size: 1.6rem; margin: 0; }
-    h2 { color: var(--secondary); font-size: 1.2rem; margin: 5px 0 0; }
-
     .controls { max-width: 500px; margin: 0 auto 20px; }
-    select {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      font-size: 1rem;
-      background: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
+    select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; }
     #orders { max-width: 600px; margin: 0 auto; }
-
-    .customer-card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 18px;
-      margin-bottom: 15px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-      border-left: 5px solid var(--primary);
-    }
-
-    .customer-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 8px;
-    }
-
-    .customer-name { font-weight: bold; font-size: 1.1rem; color: #222; }
-    .customer-phone { font-size: 0.9rem; color: #666; background: #f0f0f0; padding: 2px 8px; border-radius: 4px; }
-
-    .item-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 1rem; }
-    .item-qty { text-align: right; font-weight: bold; color: var(--primary); }
-
-    /* New Status Button Styles */
-    .status-btn {
-      width: 100%;
-      margin-top: 15px;
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .btn-pending { background-color: var(--warning); color: #000; }
-    .btn-delivered { background-color: var(--success); color: #fff; }
-
-    .empty-state { text-align: center; padding: 40px; color: #999; }
+    .customer-card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border-left: 5px solid var(--primary); }
+    .customer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+    .customer-name { font-weight: bold; }
+    .item-row { display: flex; justify-content: space-between; padding: 6px 0; }
+    .status-btn { width: 100%; margin-top: 15px; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
   </style>
 </head>
 <body>
-
-<header>
-  <h1>Skane Tamil Sangam</h1>
-  <h2>Vendor Orders Dashboard</h2>
-</header>
-
-<div class="controls">
-  <select id="vendorSelect">
-    <option value="">Choose Your Stall / Vendor</option>
-  </select>
-</div>
-
-<div id="orders">
-  <div class="empty-state">Select a vendor to see incoming orders</div>
-</div>
+  <header><h1>Skane Tamil Sangam</h1><h2>Vendor Dashboard</h2></header>
+  <div class="controls"><select id="vendorSelect"><option value="">Choose Your Stall</option></select></div>
+  <div id="orders"></div>
 
 <script>
-const API = window.location.hostname === "localhost"
-  ? "http://localhost:3000"
-  : "https://food-pre-order-backend.onrender.com";
-
+const API = "https://food-pre-order-backend.onrender.com";
 const vendorSelect = document.getElementById("vendorSelect");
 const ordersDiv = document.getElementById("orders");
 
-function loadVendors() {
-  fetch(`${API}/vendors-dropdown`)
-    .then(res => res.json())
-    .then(data => {
-      data.forEach(vendor => {
-        const option = document.createElement("option");
-        option.value = vendor.id;
-        option.textContent = vendor.name;
-        vendorSelect.appendChild(option);
-      });
-    })
-    .catch(err => console.error("Error loading vendors:", err));
-}
+fetch(`${API}/vendors-dropdown`).then(res => res.json()).then(data => {
+  data.forEach(v => {
+    let opt = document.createElement("option"); opt.value = v.id; opt.textContent = v.name;
+    vendorSelect.appendChild(opt);
+  });
+});
 
-// New function to update status in DB
 function toggleDelivery(orderId, currentStatus) {
   const newStatus = currentStatus === 'Delivered' ? 'Pending' : 'Delivered';
-  
   fetch(`${API}/order/${orderId}/delivery`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status: newStatus })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-        // Refresh the current view
-        loadVendorOrders(vendorSelect.value);
-    }
-  })
-  .catch(err => alert("Error updating status"));
+  }).then(() => loadVendorOrders(vendorSelect.value));
 }
 
 function loadVendorOrders(vendorId) {
-  if (!vendorId) {
-    ordersDiv.innerHTML = '<div class="empty-state">Select a vendor to see incoming orders</div>';
-    return;
-  }
-
-  ordersDiv.innerHTML = '<div class="empty-state">Loading orders...</div>';
-
-  fetch(`${API}/vendor-orders/${vendorId}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.length === 0) {
-        ordersDiv.innerHTML = '<div class="empty-state">No orders found for this stall.</div>';
-        return;
+  if (!vendorId) return;
+  fetch(`${API}/vendor-orders/${vendorId}`).then(res => res.json()).then(data => {
+    const orders = {};
+    data.forEach(row => {
+      if (!orders[row.order_id]) {
+        orders[row.order_id] = { id: row.order_id, name: row.customer_name, phone: row.customer_phone, status: row.delivery_status || 'Pending', items: [] };
       }
-
-      // Grouping by Order ID to ensure one button per order
-      const orders = {};
-      data.forEach(row => {
-        if (!orders[row.order_id]) {
-          orders[row.order_id] = { 
-            id: row.order_id,
-            name: row.customer_name, 
-            phone: row.customer_phone, 
-            status: row.delivery_status || 'Pending',
-            items: [] 
-          };
-        }
-        orders[row.order_id].items.push(row);
-      });
-
-      ordersDiv.innerHTML = "";
-      Object.values(orders).forEach(order => {
-        const card = document.createElement("div");
-        card.className = "customer-card";
-        
-        const itemsHtml = order.items.map(item => `
-          <div class="item-row">
-            <span class="item-name">${item.item_name}</span>
-            <span class="item-qty">Qty: ${item.quantity}</span>
-          </div>
-        `).join('');
-
-        const isDelivered = order.status === 'Delivered';
-
-        card.innerHTML = `
-          <div class="customer-header">
-            <span class="customer-name">${order.name}</span>
-            <span class="customer-phone">${order.phone}</span>
-          </div>
-          <div class="item-list">
-            ${itemsHtml}
-          </div>
-          <button 
-            onclick="toggleDelivery('${order.id}', '${order.status}')"
-            class="status-btn ${isDelivered ? 'btn-delivered' : 'btn-pending'}">
-            ${isDelivered ? '✓ Delivered' : 'Mark as Delivered'}
-          </button>
-        `;
-        ordersDiv.appendChild(card);
-      });
-    })
-    .catch(err => {
-      console.error(err);
-      ordersDiv.innerHTML = '<div class="empty-state">Error loading orders.</div>';
+      orders[row.order_id].items.push(row);
     });
+
+    ordersDiv.innerHTML = "";
+    Object.values(orders).forEach(order => {
+      const isDelivered = order.status === 'Delivered';
+      const card = document.createElement("div");
+      card.className = "customer-card";
+      card.innerHTML = `
+        <div class="customer-header"><span class="customer-name">${order.name}</span><span>${order.phone}</span></div>
+        <div>${order.items.map(i => `<div class="item-row"><span>${i.item_name}</span><b>Qty: ${i.quantity}</b></div>`).join('')}</div>
+        <button onclick="toggleDelivery('${order.id}', '${order.status}')" class="status-btn" 
+                style="background:${isDelivered ? '#28a745' : '#ffc107'}; color:${isDelivered ? 'white' : 'black'};">
+          ${isDelivered ? '✓ Delivered' : 'Mark as Delivered'}
+        </button>`;
+      ordersDiv.appendChild(card);
+    });
+  }).catch(() => { ordersDiv.innerHTML = "Error loading orders."; });
 }
 
 vendorSelect.addEventListener("change", () => loadVendorOrders(vendorSelect.value));
-loadVendors();
 </script>
-
 </body>
 </html>
