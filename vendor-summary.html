@@ -10,6 +10,8 @@
       --secondary: #ff47b5;
       --bg: #f8f9fa;
       --card-bg: #ffffff;
+      --success: #28a745;
+      --warning: #ffc107;
     }
 
     body {
@@ -20,20 +22,11 @@
       color: #333;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-
+    header { text-align: center; margin-bottom: 25px; }
     h1 { color: var(--primary); font-size: 1.6rem; margin: 0; }
     h2 { color: var(--secondary); font-size: 1.2rem; margin: 5px 0 0; }
 
-    /* Elegant Dropdown */
-    .controls {
-      max-width: 500px;
-      margin: 0 auto 20px;
-    }
-
+    .controls { max-width: 500px; margin: 0 auto 20px; }
     select {
       width: 100%;
       padding: 12px;
@@ -44,11 +37,7 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-    /* Customer Cards */
-    #orders {
-      max-width: 600px;
-      margin: 0 auto;
-    }
+    #orders { max-width: 600px; margin: 0 auto; }
 
     .customer-card {
       background: var(--card-bg);
@@ -68,47 +57,27 @@
       padding-bottom: 8px;
     }
 
-    .customer-name {
+    .customer-name { font-weight: bold; font-size: 1.1rem; color: #222; }
+    .customer-phone { font-size: 0.9rem; color: #666; background: #f0f0f0; padding: 2px 8px; border-radius: 4px; }
+
+    .item-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 1rem; }
+    .item-qty { text-align: right; font-weight: bold; color: var(--primary); }
+
+    /* New Status Button Styles */
+    .status-btn {
+      width: 100%;
+      margin-top: 15px;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
       font-weight: bold;
-      font-size: 1.1rem;
-      color: #222;
+      cursor: pointer;
+      transition: 0.3s;
     }
+    .btn-pending { background-color: var(--warning); color: #000; }
+    .btn-delivered { background-color: var(--success); color: #fff; }
 
-    .customer-phone {
-      font-size: 0.9rem;
-      color: #666;
-      background: #f0f0f0;
-      padding: 2px 8px;
-      border-radius: 4px;
-    }
-
-    /* Item List Alignment */
-    .item-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .item-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      font-size: 1rem;
-    }
-
-    .item-name { flex: 2; }
-    .item-qty { 
-      flex: 1; 
-      text-align: right; 
-      font-weight: bold; 
-      color: var(--primary); 
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-      color: #999;
-    }
+    .empty-state { text-align: center; padding: 40px; color: #999; }
   </style>
 </head>
 <body>
@@ -136,7 +105,6 @@ const API = window.location.hostname === "localhost"
 const vendorSelect = document.getElementById("vendorSelect");
 const ordersDiv = document.getElementById("orders");
 
-// 1. Fetch vendors for dropdown
 function loadVendors() {
   fetch(`${API}/vendors-dropdown`)
     .then(res => res.json())
@@ -151,7 +119,25 @@ function loadVendors() {
     .catch(err => console.error("Error loading vendors:", err));
 }
 
-// 2. Load and group orders
+// New function to update status in DB
+function toggleDelivery(orderId, currentStatus) {
+  const newStatus = currentStatus === 'Delivered' ? 'Pending' : 'Delivered';
+  
+  fetch(`${API}/order/${orderId}/delivery`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status: newStatus })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+        // Refresh the current view
+        loadVendorOrders(vendorSelect.value);
+    }
+  })
+  .catch(err => alert("Error updating status"));
+}
+
 function loadVendorOrders(vendorId) {
   if (!vendorId) {
     ordersDiv.innerHTML = '<div class="empty-state">Select a vendor to see incoming orders</div>';
@@ -168,39 +154,48 @@ function loadVendorOrders(vendorId) {
         return;
       }
 
-      // Grouping logic
-      const customers = {};
+      // Grouping by Order ID to ensure one button per order
+      const orders = {};
       data.forEach(row => {
-        if (!customers[row.customer_id]) {
-          customers[row.customer_id] = { 
+        if (!orders[row.order_id]) {
+          orders[row.order_id] = { 
+            id: row.order_id,
             name: row.customer_name, 
             phone: row.customer_phone, 
+            status: row.delivery_status || 'Pending',
             items: [] 
           };
         }
-        customers[row.customer_id].items.push(row);
+        orders[row.order_id].items.push(row);
       });
 
       ordersDiv.innerHTML = "";
-      Object.values(customers).forEach(cust => {
+      Object.values(orders).forEach(order => {
         const card = document.createElement("div");
         card.className = "customer-card";
         
-        const itemsHtml = cust.items.map(item => `
+        const itemsHtml = order.items.map(item => `
           <div class="item-row">
             <span class="item-name">${item.item_name}</span>
             <span class="item-qty">Qty: ${item.quantity}</span>
           </div>
         `).join('');
 
+        const isDelivered = order.status === 'Delivered';
+
         card.innerHTML = `
           <div class="customer-header">
-            <span class="customer-name">${cust.name}</span>
-            <span class="customer-phone">${cust.phone}</span>
+            <span class="customer-name">${order.name}</span>
+            <span class="customer-phone">${order.phone}</span>
           </div>
           <div class="item-list">
             ${itemsHtml}
           </div>
+          <button 
+            onclick="toggleDelivery('${order.id}', '${order.status}')"
+            class="status-btn ${isDelivered ? 'btn-delivered' : 'btn-pending'}">
+            ${isDelivered ? '✓ Delivered' : 'Mark as Delivered'}
+          </button>
         `;
         ordersDiv.appendChild(card);
       });
