@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,8 +32,15 @@
       margin-bottom: 30px;
     }
 
-    h1 { color: var(--primary); margin-bottom: 5px; }
-    p { color: #666; margin-top: 0; }
+    h1 {
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+
+    p {
+      color: #666;
+      margin-top: 0;
+    }
 
     /* Admin Section Cards */
     .admin-card {
@@ -40,7 +48,7 @@
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 25px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .card-title {
@@ -79,12 +87,34 @@
       transition: opacity 0.2s;
     }
 
-    button:active { opacity: 0.8; }
+    button:active {
+      opacity: 0.8;
+    }
 
-    .btn-add { background: var(--primary); color: white; width: 100%; }
-    .btn-update { background: var(--success); color: white; padding: 8px 15px; }
-    .btn-delete { background: var(--danger); color: white; padding: 8px 15px; }
-    .btn-delete-vendor { background: #6c757d; color: white; font-size: 0.8rem; padding: 5px 10px; }
+    .btn-add {
+      background: var(--primary);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-update {
+      background: var(--success);
+      color: white;
+      padding: 8px 15px;
+    }
+
+    .btn-delete {
+      background: var(--danger);
+      color: white;
+      padding: 8px 15px;
+    }
+
+    .btn-delete-vendor {
+      background: #6c757d;
+      color: white;
+      font-size: 0.8rem;
+      padding: 5px 10px;
+    }
 
     /* Menu Item List */
     .menu-list {
@@ -104,56 +134,77 @@
 
     /* Mobile Adaptations */
     @media (max-width: 600px) {
-      .form-group { grid-template-columns: 1fr; }
+      .form-group {
+        grid-template-columns: 1fr;
+      }
+
       .menu-row {
         grid-template-columns: 1fr 1fr;
         gap: 10px;
         padding: 15px 0;
       }
-      .menu-row input:first-child { grid-column: span 2; } /* Name takes full width */
-      .menu-row button { grid-column: span 1; }
+
+      .menu-row input:first-child {
+        grid-column: span 2;
+      }
+
+      /* Name takes full width */
+      .menu-row button {
+        grid-column: span 1;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<div class="container">
-  <header>
-    <h1>STS Admin Control</h1>
-    <p>Manage Event Vendors & Menu Items</p>
-  </header>
+  <div class="container">
+    <header>
+      <div style="text-align: left; margin-bottom: 15px;">
+        <a id="back-link" href="admin-hub.html"
+          style="text-decoration: none; color: #666; font-weight: bold; display:none;">⬅️ Back to Hub</a>
+      </div>
+      <h1>STS Admin Control</h1>
+      <p>Manage Event Vendors & Menu Items</p>
+    </header>
 
-  <div class="admin-card">
-    <div class="card-title">Add New Vendor</div>
-    <div class="form-group">
-      <input id="vname" placeholder="Vendor Name">
-      <input id="vphone" placeholder="Phone Number">
-      <input id="vswish" placeholder="Swish Number">
+    <script>
+      if (new URLSearchParams(window.location.search).get("admin") === "true") {
+        document.getElementById("back-link").style.display = "inline-block";
+      }
+    </script>
+
+    <div class="admin-card">
+      <div class="card-title">Add New Vendor</div>
+      <div class="form-group">
+        <input id="vname" placeholder="Vendor Name">
+        <input id="vphone" placeholder="Phone Number">
+        <input id="vswish" placeholder="Swish Number">
+      </div>
+      <button class="btn-add" onclick="addVendor()">Register Vendor</button>
     </div>
-    <button class="btn-add" onclick="addVendor()">Register Vendor</button>
+
+    <div id="vendors"></div>
   </div>
 
-  <div id="vendors"></div>
-</div>
+  <script>
+    const API = window.location.hostname === "localhost"
+      ? "http://localhost:3000"
+      : "https://food-pre-order-backend.onrender.com";
 
-<script>
-const API = window.location.hostname === "localhost"
-  ? "http://localhost:3000"
-  : "https://food-pre-order-backend.onrender.com";
+    const vendorsDiv = document.getElementById("vendors");
 
-const vendorsDiv = document.getElementById("vendors");
+    async function loadVendors() {
+      try {
+        const res = await fetch(`${API}/vendors`);
+        const data = await res.json();
 
-async function loadVendors() {
-  try {
-    const res = await fetch(`${API}/vendors`);
-    const data = await res.json();
-    
-    vendorsDiv.innerHTML = "";
-    data.forEach(v => {
-      const card = document.createElement("div");
-      card.className = "admin-card";
-      
-      let menuHtml = v.menu.map(m => `
+        vendorsDiv.innerHTML = "";
+        data.forEach(v => {
+          const card = document.createElement("div");
+          card.className = "admin-card";
+
+          let menuHtml = v.menu.map(m => `
         <div class="menu-row">
           <input id="name_${m.id}" value="${m.item_name}">
           <input id="price_${m.id}" value="${m.price}" type="number" placeholder="Price">
@@ -163,7 +214,7 @@ async function loadVendors() {
         </div>
       `).join('');
 
-      card.innerHTML = `
+          card.innerHTML = `
         <div class="card-title">
           <span>${v.name} <small style="font-weight:normal; color:#888; font-size:0.8rem;">(${v.swish})</small></span>
           <button class="btn-delete-vendor" onclick="deleteVendor(${v.id})">Delete Stall</button>
@@ -184,68 +235,69 @@ async function loadVendors() {
           ${menuHtml || '<p style="color:#999; font-size:0.9rem;">No items yet.</p>'}
         </div>
       `;
-      vendorsDiv.appendChild(card);
-    });
-  } catch (err) {
-    console.error("Load Failed:", err);
-  }
-}
+          vendorsDiv.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Load Failed:", err);
+      }
+    }
 
-// Logic functions (Same as original but with slightly cleaner handling)
-function addVendor() {
-  const name = vname.value.trim();
-  const phone = vphone.value.trim();
-  const swish = vswish.value.trim();
-  if (!name || !phone || !swish) return alert("Fill all fields");
+    // Logic functions (Same as original but with slightly cleaner handling)
+    function addVendor() {
+      const name = vname.value.trim();
+      const phone = vphone.value.trim();
+      const swish = vswish.value.trim();
+      if (!name || !phone || !swish) return alert("Fill all fields");
 
-  fetch(`${API}/admin/vendor`, {
-    method: "POST",
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, phone, swish })
-  }).then(res => res.ok ? (location.reload()) : alert("Error"));
-}
+      fetch(`${API}/admin/vendor`, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, swish })
+      }).then(res => res.ok ? (location.reload()) : alert("Error"));
+    }
 
-function deleteVendor(id) {
-  if (confirm("Delete this entire vendor and their items?")) {
-    fetch(`${API}/admin/vendor/${id}`, { method: "DELETE" }).then(loadVendors);
-  }
-}
+    function deleteVendor(id) {
+      if (confirm("Delete this entire vendor and their items?")) {
+        fetch(`${API}/admin/vendor/${id}`, { method: "DELETE" }).then(loadVendors);
+      }
+    }
 
-function addMenu(vendorId) {
-  const item_name = document.getElementById(`item_${vendorId}`).value.trim();
-  const price = Number(document.getElementById(`price_${vendorId}_new`).value);
-  const max_quantity = Number(document.getElementById(`max_${vendorId}_new`).value);
+    function addMenu(vendorId) {
+      const item_name = document.getElementById(`item_${vendorId}`).value.trim();
+      const price = Number(document.getElementById(`price_${vendorId}_new`).value);
+      const max_quantity = Number(document.getElementById(`max_${vendorId}_new`).value);
 
-  if (!item_name || price <= 0) return alert("Invalid entry");
+      if (!item_name || price <= 0) return alert("Invalid entry");
 
-  fetch(`${API}/admin/menu`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ vendor_id: vendorId, item_name, price, max_quantity })
-  }).then(loadVendors);
-}
+      fetch(`${API}/admin/menu`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vendor_id: vendorId, item_name, price, max_quantity })
+      }).then(loadVendors);
+    }
 
-function updateMenu(id) {
-  const item_name = document.getElementById(`name_${id}`).value.trim();
-  const price = Number(document.getElementById(`price_${id}`).value);
-  const max_quantity = Number(document.getElementById(`max_${id}`).value);
+    function updateMenu(id) {
+      const item_name = document.getElementById(`name_${id}`).value.trim();
+      const price = Number(document.getElementById(`price_${id}`).value);
+      const max_quantity = Number(document.getElementById(`max_${id}`).value);
 
-  fetch(`${API}/admin/menu/${id}`, {
-    method: "PUT",
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ item_name, price, max_quantity })
-  }).then(res => res.ok ? alert("Updated") : alert("Failed"));
-}
+      fetch(`${API}/admin/menu/${id}`, {
+        method: "PUT",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_name, price, max_quantity })
+      }).then(res => res.ok ? alert("Updated") : alert("Failed"));
+    }
 
-function deleteMenu(id) {
-  if (confirm("Delete item?")) {
-    fetch(`${API}/admin/menu/${id}`, { method: "DELETE" })
-      .then(res => res.ok ? loadVendors() : res.text().then(alert));
-  }
-}
+    function deleteMenu(id) {
+      if (confirm("Delete item?")) {
+        fetch(`${API}/admin/menu/${id}`, { method: "DELETE" })
+          .then(res => res.ok ? loadVendors() : res.text().then(alert));
+      }
+    }
 
-loadVendors();
-</script>
+    loadVendors();
+  </script>
 
 </body>
+
 </html>

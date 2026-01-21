@@ -166,9 +166,19 @@
 
     <div class="container">
         <header>
-            <h1>Admin Order Manager</h1>
+            <div style="flex:1">
+                <a id="back-link" href="admin-hub.html"
+                    style="text-decoration: none; color: #666; font-size: 0.9rem; font-weight:bold; display:none;">⬅️
+                    Back to Hub</a>
+                <h1 style="margin-top:5px;">Admin Order Manager</h1>
+            </div>
             <button onclick="loadOrders()" style="padding: 8px 15px; cursor: pointer;">Refresh</button>
         </header>
+        <script>
+            if (new URLSearchParams(window.location.search).get("admin") === "true") {
+                document.getElementById("back-link").style.display = "inline-block";
+            }
+        </script>
 
         <input class="search-bar" id="search" placeholder="Search by name, phone or vendor..." onkeyup="filterOrders()">
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,14 +29,26 @@
       padding: 25px 15px;
       text-align: center;
       border-radius: 0 0 25px 25px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       margin-bottom: 20px;
     }
 
-    .app-header h1 { margin: 0; font-size: 1.5rem; }
-    .app-header p { margin: 5px 0 0; opacity: 0.9; font-size: 0.9rem; }
+    .app-header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
 
-    .container { max-width: 600px; margin: 0 auto; padding: 15px; }
+    .app-header p {
+      margin: 5px 0 0;
+      opacity: 0.9;
+      font-size: 0.9rem;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 15px;
+    }
 
     /* Control Box */
     .controls {
@@ -43,7 +56,7 @@
       padding: 15px;
       border-radius: 15px;
       margin-top: -20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
       margin-bottom: 20px;
     }
 
@@ -62,7 +75,7 @@
       border-radius: 18px;
       padding: 18px;
       margin-bottom: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
       border-left: 5px solid var(--primary);
     }
 
@@ -75,8 +88,15 @@
       padding-bottom: 10px;
     }
 
-    .customer-name { font-weight: bold; font-size: 1.1rem; }
-    .customer-phone { color: #666; font-size: 0.9rem; }
+    .customer-name {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .customer-phone {
+      color: #666;
+      font-size: 0.9rem;
+    }
 
     .item-row {
       display: flex;
@@ -85,7 +105,10 @@
       font-size: 0.95rem;
     }
 
-    .item-qty { font-weight: bold; color: var(--primary); }
+    .item-qty {
+      font-weight: bold;
+      color: var(--primary);
+    }
 
     .status-btn {
       width: 100%;
@@ -99,95 +122,112 @@
       transition: opacity 0.2s;
     }
 
-    .status-btn:active { opacity: 0.8; }
-    
-    .empty-state { text-align: center; padding: 40px; color: #999; }
+    .status-btn:active {
+      opacity: 0.8;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
   </style>
 </head>
+
 <body>
 
-<header class="app-header">
-  <h1>Skane Tamil Sangam</h1>
-  <p>Vendor Dashboard • Live Orders</p>
-</header>
+  <header class="app-header">
+    <div style="text-align: left; margin-bottom: 10px;">
+      <a id="back-link" href="admin-hub.html"
+        style="color: rgba(255,255,255,0.9); text-decoration: none; font-weight: bold; display:none;">⬅️ Back
+        to Hub</a>
+    </div>
+    <h1>Skane Tamil Sangam</h1>
+    <p>Vendor Dashboard • Live Orders</p>
+  </header>
+  <script>
+    if (new URLSearchParams(window.location.search).get("admin") === "true") {
+      document.getElementById("back-link").style.display = "inline-block";
+    }
+  </script>
 
-<div class="container">
-  <div class="controls">
-    <select id="vendorSelect">
-      <option value="">Choose Your Stall</option>
-    </select>
+  <div class="container">
+    <div class="controls">
+      <select id="vendorSelect">
+        <option value="">Choose Your Stall</option>
+      </select>
+    </div>
+
+    <div id="orders">
+      <div class="empty-state">Select a vendor to see incoming orders</div>
+    </div>
   </div>
 
-  <div id="orders">
-    <div class="empty-state">Select a vendor to see incoming orders</div>
-  </div>
-</div>
+  <script>
+    const API = window.location.hostname === "localhost"
+      ? "http://localhost:3000"
+      : "https://food-pre-order-backend.onrender.com";
 
-<script>
-const API = window.location.hostname === "localhost"
-  ? "http://localhost:3000"
-  : "https://food-pre-order-backend.onrender.com";
+    const vendorSelect = document.getElementById("vendorSelect");
+    const ordersDiv = document.getElementById("orders");
 
-const vendorSelect = document.getElementById("vendorSelect");
-const ordersDiv = document.getElementById("orders");
+    // Load Vendors for dropdown
+    fetch(`${API}/vendors-dropdown`)
+      .then(res => res.json())
+      .then(data => {
+        data.forEach(v => {
+          let opt = document.createElement("option");
+          opt.value = v.id;
+          opt.textContent = v.name;
+          vendorSelect.appendChild(opt);
+        });
+      });
 
-// Load Vendors for dropdown
-fetch(`${API}/vendors-dropdown`)
-  .then(res => res.json())
-  .then(data => {
-    data.forEach(v => {
-      let opt = document.createElement("option");
-      opt.value = v.id;
-      opt.textContent = v.name;
-      vendorSelect.appendChild(opt);
-    });
-  });
+    function toggleDelivery(orderId, currentStatus) {
+      const newStatus = currentStatus === 'Delivered' ? 'Pending' : 'Delivered';
+      fetch(`${API}/order/${orderId}/delivery`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      }).then(() => loadVendorOrders(vendorSelect.value));
+    }
 
-function toggleDelivery(orderId, currentStatus) {
-  const newStatus = currentStatus === 'Delivered' ? 'Pending' : 'Delivered';
-  fetch(`${API}/order/${orderId}/delivery`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status: newStatus })
-  }).then(() => loadVendorOrders(vendorSelect.value));
-}
-
-function loadVendorOrders(vendorId) {
-  if (!vendorId) {
-    ordersDiv.innerHTML = '<div class="empty-state">Select a vendor to see incoming orders</div>';
-    return;
-  }
-
-  ordersDiv.innerHTML = '<div class="empty-state">Loading orders...</div>';
-
-  fetch(`${API}/vendor-orders/${vendorId}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.length === 0) {
-        ordersDiv.innerHTML = '<div class="empty-state">No orders found for this stall.</div>';
+    function loadVendorOrders(vendorId) {
+      if (!vendorId) {
+        ordersDiv.innerHTML = '<div class="empty-state">Select a vendor to see incoming orders</div>';
         return;
       }
 
-      const orders = {};
-      data.forEach(row => {
-        if (!orders[row.order_id]) {
-          orders[row.order_id] = { 
-            id: row.order_id, 
-            name: row.customer_name, 
-            phone: row.customer_phone, 
-            status: row.delivery_status || 'Pending', 
-            items: [] 
-          };
-        }
-        orders[row.order_id].items.push(row);
-      });
+      ordersDiv.innerHTML = '<div class="empty-state">Loading orders...</div>';
 
-      ordersDiv.innerHTML = "";
-      Object.values(orders).forEach(order => {
-        const isDelivered = order.status === 'Delivered';
-        const card = document.createElement("div");
-        card.className = "customer-card";
-        card.innerHTML = `
+      fetch(`${API}/vendor-orders/${vendorId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length === 0) {
+            ordersDiv.innerHTML = '<div class="empty-state">No orders found for this stall.</div>';
+            return;
+          }
+
+          const orders = {};
+          data.forEach(row => {
+            if (!orders[row.order_id]) {
+              orders[row.order_id] = {
+                id: row.order_id,
+                name: row.customer_name,
+                phone: row.customer_phone,
+                status: row.delivery_status || 'Pending',
+                items: []
+              };
+            }
+            orders[row.order_id].items.push(row);
+          });
+
+          ordersDiv.innerHTML = "";
+          Object.values(orders).forEach(order => {
+            const isDelivered = order.status === 'Delivered';
+            const card = document.createElement("div");
+            card.className = "customer-card";
+            card.innerHTML = `
           <div class="customer-header">
             <span class="customer-name">${order.name}</span>
             <span class="customer-phone">${order.phone}</span>
@@ -206,13 +246,14 @@ function loadVendorOrders(vendorId) {
                          color:${isDelivered ? 'white' : 'black'};">
             ${isDelivered ? '✓ Delivered' : 'Mark as Delivered'}
           </button>`;
-        ordersDiv.appendChild(card);
-      });
-    })
-    .catch(() => { ordersDiv.innerHTML = '<div class="empty-state">Error loading orders.</div>'; });
-}
+            ordersDiv.appendChild(card);
+          });
+        })
+        .catch(() => { ordersDiv.innerHTML = '<div class="empty-state">Error loading orders.</div>'; });
+    }
 
-vendorSelect.addEventListener("change", () => loadVendorOrders(vendorSelect.value));
-</script>
+    vendorSelect.addEventListener("change", () => loadVendorOrders(vendorSelect.value));
+  </script>
 </body>
+
 </html>

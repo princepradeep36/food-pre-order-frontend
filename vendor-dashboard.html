@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,8 +26,18 @@
       margin-bottom: 30px;
     }
 
-    h1 { color: var(--primary); font-size: 1.5rem; margin: 0; }
-    h2 { color: #555; font-size: 1rem; margin: 5px 0; font-weight: normal; }
+    h1 {
+      color: var(--primary);
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    h2 {
+      color: #555;
+      font-size: 1rem;
+      margin: 5px 0;
+      font-weight: normal;
+    }
 
     .dashboard-grid {
       display: grid;
@@ -41,7 +52,7 @@
       background: var(--card);
       border-radius: 16px;
       padding: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       display: flex;
       flex-direction: column;
     }
@@ -116,57 +127,67 @@
     }
   </style>
 </head>
+
 <body>
 
-<header>
-  <h1>Skane Tamil Sangam</h1>
-  <h2>Overall Event Sales Summary (Pongal 2026)</h2>
-</header>
+  <header>
+    <div style="text-align: left; max-width: 1200px; margin: 0 auto 15px auto; padding-left: 10px;">
+      <a id="back-link" href="admin-hub.html"
+        style="text-decoration: none; color: #007bff; font-weight: bold; display:none;">⬅️ Back to Hub</a>
+    </div>
+    <h1>Skane Tamil Sangam</h1>
+    <h2>Overall Event Sales Summary (Pongal 2026)</h2>
+  </header>
+  <script>
+    if (new URLSearchParams(window.location.search).get("admin") === "true") {
+      document.getElementById("back-link").style.display = "inline-block";
+    }
+  </script>
 
-<div id="summary" class="dashboard-grid">
-  <div class="empty-state">Loading order totals...</div>
-</div>
+  <div id="summary" class="dashboard-grid">
+    <div class="empty-state">Loading order totals...</div>
+  </div>
 
-<script>
-const API = window.location.hostname === "localhost"
-  ? "http://localhost:3000"
-  : "https://food-pre-order-backend.onrender.com";
+  <script>
+    const API = window.location.hostname === "localhost"
+      ? "http://localhost:3000"
+      : "https://food-pre-order-backend.onrender.com";
 
-const summaryDiv = document.getElementById("summary");
+    const summaryDiv = document.getElementById("summary");
 
-function loadSummary() {
-  fetch(`${API}/vendor-summary`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.length === 0) {
-        summaryDiv.innerHTML = '<div class="empty-state">No orders have been placed yet.</div>';
-        return;
-      }
+    function loadSummary() {
+      fetch(`${API}/vendor-summary`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length === 0) {
+            summaryDiv.innerHTML = '<div class="empty-state">No orders have been placed yet.</div>';
+            return;
+          }
 
-      // Group data by vendor name
-      const vendors = {};
-      data.forEach(row => {
-        const key = row.vendor_name;
-        if (!vendors[key]) {
-          vendors[key] = { 
-            name: row.vendor_name, 
-            phone: row.phone, 
-            items: [],
-            grand_total: 0 
-          };
-        }
-        if (row.item_name) {
-          vendors[key].items.push(row);
-          vendors[key].grand_total += Number(row.total_amount || 0);
-        }
-      });
+          // Group data by vendor name
+          const vendors = {};
+          data.forEach(row => {
+            const key = row.vendor_name;
+            if (!vendors[key]) {
+              vendors[key] = {
+                name: row.vendor_name,
+                phone: row.phone,
+                items: [],
+                grand_total: 0
+              };
+            }
+            if (row.item_name) {
+              vendors[key].items.push(row);
+              vendors[key].grand_total += Number(row.total_amount || 0);
+            }
+          });
 
-      summaryDiv.innerHTML = "";
-      Object.values(vendors).forEach(v => {
-        const card = document.createElement("div");
-        card.className = "vendor-card";
+          summaryDiv.innerHTML = "";
+          Object.values(vendors).forEach(v => {
+            const card = document.createElement("div");
+            card.className = "vendor-card";
 
-        const itemsHtml = v.items.map(i => `
+            const itemsHtml = v.items.map(i => `
           <div class="item-row">
             <span class="item-name">${i.item_name}</span>
             <span class="item-qty">x${i.total_quantity}</span>
@@ -174,7 +195,7 @@ function loadSummary() {
           </div>
         `).join('');
 
-        card.innerHTML = `
+            card.innerHTML = `
           <div class="vendor-header">
             <span class="vendor-title">${v.name}</span>
             <span class="vendor-contact">${v.phone}</span>
@@ -186,17 +207,18 @@ function loadSummary() {
             Total Sales: ${v.grand_total}kr
           </div>
         `;
-        summaryDiv.appendChild(card);
-      });
-    })
-    .catch(err => {
-      console.error(err);
-      summaryDiv.innerHTML = '<div class="empty-state">Error connecting to server.</div>';
-    });
-}
+            summaryDiv.appendChild(card);
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          summaryDiv.innerHTML = '<div class="empty-state">Error connecting to server.</div>';
+        });
+    }
 
-loadSummary();
-</script>
+    loadSummary();
+  </script>
 
 </body>
+
 </html>
