@@ -275,6 +275,18 @@
     .pulse-animation {
       animation: pulse 0.3s ease-in-out;
     }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 
@@ -480,6 +492,9 @@
           ${!vCart.paid ?
             `<div style="display:flex; gap:5px;">
                <button class="pay-btn" onclick="payWithSwish(${vId}, ${vendorTotal})" style="margin:0; padding: 10px 15px; background: #E61E6D;">Pay with Swish</button>
+               ${vCart.swishOpened ?
+              `<button class="pay-btn" onclick="confirmPaid(${vId})" style="margin:0; padding: 10px 15px; animation: fadeIn 0.5s;">Mark Paid</button>`
+              : ''}
              </div>` : ''}
         </div>
       </div>
@@ -498,7 +513,7 @@
         cartDiv.innerHTML = "<p style='text-align:center; color:#999;'>Your basket is empty</p>";
         checkoutBtn.disabled = true;
       } else {
-        checkoutBtn.disabled = !allPaid; // Only enable if all vendors are marked paid
+        checkoutBtn.disabled = !allPaid;
       }
     }
 
@@ -573,14 +588,14 @@
       const url = `swish://payment?data=${encodeURIComponent(JSON.stringify(swishData))}`;
       window.location.href = url;
 
-      // Auto-mark as paid since we removed the manual button
-      // This assumes if they click Pay, they are paying.
-      setTimeout(() => {
-        if (confirm("Did you complete the payment in Swish?")) {
-          cart[vId].paid = true;
-          renderCart();
-        }
-      }, 500); // Small delay to allow app switch logic to start
+      // Enable the "Mark as Paid" button
+      cart[vId].swishOpened = true;
+      renderCart();
+    }
+
+    function confirmPaid(vId) {
+      cart[vId].paid = true;
+      renderCart();
     }
   </script>
 </body>
