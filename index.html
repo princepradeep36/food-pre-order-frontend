@@ -498,7 +498,7 @@
         cartDiv.innerHTML = "<p style='text-align:center; color:#999;'>Your basket is empty</p>";
         checkoutBtn.disabled = true;
       } else {
-        checkoutBtn.disabled = false; // Always allow checkout
+        checkoutBtn.disabled = !allPaid; // Only enable if all vendors are marked paid
       }
     }
 
@@ -572,6 +572,15 @@
 
       const url = `swish://payment?data=${encodeURIComponent(JSON.stringify(swishData))}`;
       window.location.href = url;
+
+      // Auto-mark as paid since we removed the manual button
+      // This assumes if they click Pay, they are paying.
+      setTimeout(() => {
+        if (confirm("Did you complete the payment in Swish?")) {
+          cart[vId].paid = true;
+          renderCart();
+        }
+      }, 500); // Small delay to allow app switch logic to start
     }
   </script>
 </body>
