@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -30,20 +31,32 @@
       padding: 25px 15px;
       text-align: center;
       border-radius: 0 0 25px 25px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .app-header h1 { margin: 0; font-size: 1.5rem; }
-    .app-header p { margin: 5px 0 0; opacity: 0.9; font-size: 0.9rem; }
+    .app-header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
 
-    .container { max-width: 600px; margin: 0 auto; padding: 15px; }
+    .app-header p {
+      margin: 5px 0 0;
+      opacity: 0.9;
+      font-size: 0.9rem;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 15px;
+    }
 
     .user-box {
       background: var(--card);
       padding: 15px;
       border-radius: 15px;
       margin-top: -20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -62,7 +75,7 @@
       border-radius: 18px;
       margin-top: 20px;
       overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     }
 
     .vendor-header {
@@ -81,10 +94,22 @@
       border-bottom: 1px solid #f9f9f9;
     }
 
-    .item-detail h4 { margin: 0; font-size: 1rem; }
-    .item-detail span { color: var(--success); font-weight: bold; font-size: 0.9rem; }
+    .item-detail h4 {
+      margin: 0;
+      font-size: 1rem;
+    }
 
-    .item-actions { display: flex; align-items: center; gap: 8px; }
+    .item-detail span {
+      color: var(--success);
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
     .qty-input {
       width: 50px;
@@ -138,7 +163,7 @@
       right: 0;
       background: white;
       padding: 15px;
-      box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
       display: flex;
       gap: 10px;
       z-index: 1000;
@@ -154,7 +179,9 @@
       font-size: 1rem;
     }
 
-    .btn-checkout:disabled { background: #ccc; }
+    .btn-checkout:disabled {
+      background: #ccc;
+    }
 
     .btn-my-orders {
       flex: 1;
@@ -175,7 +202,7 @@
       color: white;
       padding: 10px 25px;
       border-radius: 50px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       z-index: 3000;
       display: none;
       font-weight: bold;
@@ -191,7 +218,7 @@
       width: 65px;
       height: 65px;
       border-radius: 50%;
-      display: none; 
+      display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
@@ -201,9 +228,14 @@
       transition: transform 0.2s;
     }
 
-    .floating-basket:active { transform: scale(0.9); }
+    .floating-basket:active {
+      transform: scale(0.9);
+    }
 
-    .basket-icon { font-size: 1.4rem; }
+    .basket-icon {
+      font-size: 1.4rem;
+    }
+
     .basket-count {
       font-size: 0.8rem;
       font-weight: bold;
@@ -215,161 +247,204 @@
     }
 
     @keyframes slideDown {
-      from { transform: translate(-50%, -100px); opacity: 0; }
-      to { transform: translate(-50%, 0); opacity: 1; }
+      from {
+        transform: translate(-50%, -100px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
     }
 
     @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.15); }
-      100% { transform: scale(1); }
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.15);
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
 
-    .pulse-animation { animation: pulse 0.3s ease-in-out; }
+    .pulse-animation {
+      animation: pulse 0.3s ease-in-out;
+    }
   </style>
 </head>
+
 <body>
 
-<div id="toast" class="toast">Item Added!</div>
+  <div id="toast" class="toast">Item Added!</div>
 
-<div id="basket-btn" class="floating-basket" onclick="document.getElementById('cart-container').scrollIntoView({behavior: 'smooth'})">
-  <span class="basket-icon">🛒</span>
-  <span class="basket-count" id="total-qty">0</span>
-</div>
-
-<header class="app-header">
-  <h1>Skane Tamil Sangam</h1>
-  <p>Pongal 2026 • Food Pre-Order</p>
-</header>
-
-<div class="container">
-  <div class="user-box">
-    <input type="text" id="name" placeholder="Full Name">
-    <input type="tel" id="phone" placeholder="10-digit Phone Number">
-  </div>
-  
-  <div id="sleep-message" style="display:none; background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 20px; border-radius: 15px; margin-top: 20px; text-align: center;">
-    <strong>Sorry, I am sleeping! 😴</strong>
-    <p>I will wake up in 2 minutes. Please refresh after 2 minutes.</p>
-    <button onclick="window.location.reload()" style="background:#856404; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">Refresh Now</button>
+  <div id="basket-btn" class="floating-basket"
+    onclick="document.getElementById('cart-container').scrollIntoView({behavior: 'smooth'})">
+    <span class="basket-icon">🛒</span>
+    <span class="basket-count" id="total-qty">0</span>
   </div>
 
-  <h3 style="margin-top: 30px; padding-left: 5px;">Menu</h3>
-  
-  <div id="vendors">
-    <p style="text-align: center; padding: 20px; color: #666;">Connecting to server...</p>
-     <p style="text-align: center; padding: 20px; color: #666;">Please wait for a minute</p>
+  <header class="app-header">
+    <h1>Skane Tamil Sangam</h1>
+    <p>Pongal 2026 • Food Pre-Order</p>
+  </header>
+
+  <div class="container">
+    <div class="user-box">
+      <input type="text" id="name" placeholder="Full Name">
+      <input type="tel" id="phone" placeholder="10-digit Phone Number">
+    </div>
+
+    <div id="sleep-message"
+      style="display:none; background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 20px; border-radius: 15px; margin-top: 20px; text-align: center;">
+      <strong>Sorry, I am sleeping! 😴</strong>
+      <p>I will wake up in 2 minutes. Please refresh after 2 minutes.</p>
+      <button onclick="window.location.reload()"
+        style="background:#856404; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">Refresh
+        Now</button>
+    </div>
+
+    <h3 style="margin-top: 30px; padding-left: 5px;">Menu</h3>
+
+    <div id="vendors">
+      <p style="text-align: center; padding: 20px; color: #666;">Connecting to server...</p>
+      <p style="text-align: center; padding: 20px; color: #666;">Please wait for a minute</p>
+    </div>
+
+    <div id="cart-container" class="cart-section">
+      <h3 style="margin-top:0">Your Cart</h3>
+      <div id="cart">Cart is empty</div>
+    </div>
   </div>
 
-  <div id="cart-container" class="cart-section">
-    <h3 style="margin-top:0">Your Cart</h3>
-    <div id="cart">Cart is empty</div>
+  <div class="bottom-bar">
+    <button class="btn-my-orders" onclick="openOrders()">My Receipts</button>
+    <button class="btn-checkout" id="checkoutBtn" onclick="checkout()" disabled>Confirm Order</button>
   </div>
-</div>
 
-<div class="bottom-bar">
-  <button class="btn-my-orders" onclick="openOrders()">My Receipts</button>
-  <button class="btn-checkout" id="checkoutBtn" onclick="checkout()" disabled>Confirm Order</button>
-</div>
+  <script>
+    const API = window.location.hostname === "localhost"
+      ? "http://localhost:3000"
+      : "https://food-pre-order-backend.onrender.com";
 
-<script>
-const API = window.location.hostname === "localhost"
-  ? "http://localhost:3000"
-  : "https://food-pre-order-backend.onrender.com";
+    let cart = {};
 
-let cart = {};
+    // LOAD VENDORS
+    fetch(`${API}/vendors`)
+      .then(res => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then(vendors => {
+        const container = document.getElementById("vendors");
+        document.getElementById("sleep-message").style.display = "none";
 
-// LOAD VENDORS
-fetch(`${API}/vendors`)
-  .then(res => {
-    if (!res.ok) throw new Error();
-    return res.json();
-  })
-  .then(vendors => {
-    const container = document.getElementById("vendors");
-    document.getElementById("sleep-message").style.display = "none";
-    
-    container.innerHTML = vendors.map(v => `
+        container.innerHTML = vendors.map(v => `
       <div class="vendor-card">
         <div class="vendor-header">${v.name}</div>
-        ${v.menu.map(m => `
-          <div class="menu-item">
+        ${v.menu.map(m => {
+          const sold = Number(m.sold_quantity) || 0;
+          const max = Number(m.max_quantity) || 0;
+          const isSoldOut = max > 0 && sold >= max;
+          const available = max > 0 ? max - sold : 1000;
+
+          return `
+          <div class="menu-item" style="${isSoldOut ? 'opacity: 0.6;' : ''}">
             <div class="item-detail">
               <h4>${m.item_name}</h4>
               <span>${m.price}kr</span>
+              ${max > 0 ? `<div style="font-size:0.75rem; color:${isSoldOut ? 'red' : '#666'}">${isSoldOut ? 'Sold Out' : `${available} left`}</div>` : ''}
             </div>
             <div class="item-actions">
-              <input type="number" class="qty-input" value="1" min="1" id="qty_${m.id}">
-              <button class="btn-add" onclick="addToCart(${v.id}, '${v.name.replace(/'/g, "\\'")}', '${v.phone}', '${v.swish}', ${m.id}, '${m.item_name.replace(/'/g, "\\'")}', ${m.price})">Add</button>
+              ${isSoldOut ? '<span style="color:red; font-weight:bold; font-size:0.85rem; padding: 5px;">SOLD OUT</span>' : `
+              <input type="number" class="qty-input" value="1" min="1" max="${available}" id="qty_${m.id}">
+              <button class="btn-add" onclick="addToCart(${v.id}, '${v.name.replace(/'/g, "\\'")}', '${v.phone}', '${v.swish}', ${m.id}, '${m.item_name.replace(/'/g, "\\'")}', ${m.price}, ${available})">Add</button>
+              `}
             </div>
           </div>
-        `).join('')}
+        `}).join('')}
       </div>
     `).join('');
-  })
-  .catch(() => {
-    document.getElementById("vendors").innerHTML = "";
-    document.getElementById("sleep-message").style.display = "block";
-  });
+      })
+      .catch(() => {
+        document.getElementById("vendors").innerHTML = "";
+        document.getElementById("sleep-message").style.display = "block";
+      });
 
-function addToCart(vId, vName, vPhone, vSwish, mId, mName, price) {
-  const qtyInput = document.getElementById(`qty_${mId}`);
-  const qty = Number(qtyInput.value);
-  if (qty <= 0) return;
+    function addToCart(vId, vName, vPhone, vSwish, mId, mName, price, maxAvail) {
+      const qtyInput = document.getElementById(`qty_${mId}`);
+      const qty = Number(qtyInput.value);
+      if (qty <= 0) return;
 
-  if (!cart[vId]) {
-    cart[vId] = { vendor: vName, phone: vPhone, swish: vSwish, items: [], paid: false };
-  }
+      // New check for max availability including current cart
+      let currentInCart = 0;
+      if (cart[vId]) {
+        const existingItem = cart[vId].items.find(i => i.id === mId);
+        if (existingItem) currentInCart = existingItem.quantity;
+      }
 
-  const existing = cart[vId].items.find(i => i.id === mId);
-  if (existing) {
-    existing.quantity += qty;
-  } else {
-    cart[vId].items.push({ id: mId, item_name: mName, price, quantity: qty });
-  }
+      if (currentInCart + qty > maxAvail) {
+        alert(`Sorty, only ${maxAvail} items available (You have ${currentInCart} in cart)`);
+        return;
+      }
 
-  // Visual feedback: Popup toast
-  showToast(`Added ${qty} x ${mName}`);
-  
-  // Basket pulse animation
-  const basket = document.getElementById("basket-btn");
-  basket.classList.remove("pulse-animation");
-  void basket.offsetWidth; // Restart CSS animation
-  basket.classList.add("pulse-animation");
+      if (!cart[vId]) {
+        cart[vId] = { vendor: vName, phone: vPhone, swish: vSwish, items: [], paid: false };
+      }
 
-  qtyInput.value = 1;
-  renderCart();
-}
+      const existing = cart[vId].items.find(i => i.id === mId);
+      if (existing) {
+        existing.quantity += qty;
+      } else {
+        cart[vId].items.push({ id: mId, item_name: mName, price, quantity: qty });
+      }
 
-function showToast(msg) {
-  const toast = document.getElementById("toast");
-  toast.innerText = msg;
-  toast.style.display = "block";
-  setTimeout(() => { toast.style.display = "none"; }, 2000);
-}
+      // Visual feedback: Popup toast
+      showToast(`Added ${qty} x ${mName}`);
 
-function renderCart() {
-  const cartDiv = document.getElementById("cart");
-  const checkoutBtn = document.getElementById("checkoutBtn");
-  const basketBtn = document.getElementById("basket-btn");
-  const totalQtyLabel = document.getElementById("total-qty");
-  
-  cartDiv.innerHTML = "";
-  let allPaid = true;
-  let hasItems = false;
-  let totalQty = 0;
+      // Basket pulse animation
+      const basket = document.getElementById("basket-btn");
+      basket.classList.remove("pulse-animation");
+      void basket.offsetWidth; // Restart CSS animation
+      basket.classList.add("pulse-animation");
 
-  for (const vId in cart) {
-    hasItems = true;
-    const vCart = cart[vId];
-    if (!vCart.paid) allPaid = false;
-    let vendorTotal = 0;
+      qtyInput.value = 1;
+      renderCart();
+    }
 
-    const itemsHtml = vCart.items.map((item) => {
-      totalQty += item.quantity;
-      const lineTotal = item.price * item.quantity;
-      vendorTotal += lineTotal;
-      return `
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.innerText = msg;
+      toast.style.display = "block";
+      setTimeout(() => { toast.style.display = "none"; }, 2000);
+    }
+
+    function renderCart() {
+      const cartDiv = document.getElementById("cart");
+      const checkoutBtn = document.getElementById("checkoutBtn");
+      const basketBtn = document.getElementById("basket-btn");
+      const totalQtyLabel = document.getElementById("total-qty");
+
+      cartDiv.innerHTML = "";
+      let allPaid = true;
+      let hasItems = false;
+      let totalQty = 0;
+
+      for (const vId in cart) {
+        hasItems = true;
+        const vCart = cart[vId];
+        if (!vCart.paid) allPaid = false;
+        let vendorTotal = 0;
+
+        const itemsHtml = vCart.items.map((item) => {
+          totalQty += item.quantity;
+          const lineTotal = item.price * item.quantity;
+          vendorTotal += lineTotal;
+          return `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.9rem;">
           <div style="flex: 2;">${item.item_name}</div>
           <div style="flex: 1; display: flex; align-items: center; gap: 5px;">
@@ -381,10 +456,10 @@ function renderCart() {
           <button onclick="removeFromCart(${vId}, ${item.id})" style="margin-left:10px; background:none; border:none; cursor:pointer;">🗑️</button>
         </div>
       `;
-    }).join('');
+        }).join('');
 
-    // --- Updated UI Block ---
-    cartDiv.innerHTML += `
+        // --- Updated UI Block ---
+        cartDiv.innerHTML += `
       <div class="vendor-pay-block" style="border-left: 4px solid ${vCart.paid ? '#28a745' : '#ff9800'}; padding: 12px; background: #fffdf9; margin-bottom: 20px; border-radius: 0 10px 10px 0; box-shadow: 2px 2px 5px rgba(0,0,0,0.05);">
         <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom: 5px;">
            <strong style="font-size: 1.1rem; color: #333;">${vCart.vendor}</strong>
@@ -402,77 +477,78 @@ function renderCart() {
 
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <strong style="font-size: 1rem;">Total: ${vendorTotal}kr</strong>
-          ${!vCart.paid ? 
+          ${!vCart.paid ?
             `<button class="pay-btn" onclick="confirmPaid(${vId})" style="margin:0; padding: 10px 15px;">Confirm Payment</button>` : ''}
         </div>
       </div>
     `;
-  }
+      }
 
-  // Floating Basket Visibility Logic
-  if (totalQty > 0) {
-    totalQtyLabel.innerText = totalQty;
-    basketBtn.style.display = "flex";
-  } else {
-    basketBtn.style.display = "none";
-  }
+      // Floating Basket Visibility Logic
+      if (totalQty > 0) {
+        totalQtyLabel.innerText = totalQty;
+        basketBtn.style.display = "flex";
+      } else {
+        basketBtn.style.display = "none";
+      }
 
-  if (!hasItems) {
-    cartDiv.innerHTML = "<p style='text-align:center; color:#999;'>Your basket is empty</p>";
-    checkoutBtn.disabled = true;
-  } else {
-    checkoutBtn.disabled = !allPaid;
-  }
-}
+      if (!hasItems) {
+        cartDiv.innerHTML = "<p style='text-align:center; color:#999;'>Your basket is empty</p>";
+        checkoutBtn.disabled = true;
+      } else {
+        checkoutBtn.disabled = !allPaid;
+      }
+    }
 
-function updateCartQty(vId, mId, change) {
-  const vendor = cart[vId];
-  if (!vendor) return;
-  const item = vendor.items.find(i => i.id === mId);
-  if (item) {
-    item.quantity += change;
-    if (item.quantity <= 0) removeFromCart(vId, mId);
-    else renderCart();
-  }
-}
+    function updateCartQty(vId, mId, change) {
+      const vendor = cart[vId];
+      if (!vendor) return;
+      const item = vendor.items.find(i => i.id === mId);
+      if (item) {
+        item.quantity += change;
+        if (item.quantity <= 0) removeFromCart(vId, mId);
+        else renderCart();
+      }
+    }
 
-function removeFromCart(vId, mId) {
-  if (!cart[vId]) return;
-  cart[vId].items = cart[vId].items.filter(i => i.id !== mId);
-  if (cart[vId].items.length === 0) delete cart[vId];
-  renderCart();
-}
+    function removeFromCart(vId, mId) {
+      if (!cart[vId]) return;
+      cart[vId].items = cart[vId].items.filter(i => i.id !== mId);
+      if (cart[vId].items.length === 0) delete cart[vId];
+      renderCart();
+    }
 
-function confirmPaid(vId) {
-  if(confirm("Confirm you have sent the Swish payment?")) {
-    cart[vId].paid = true;
-    renderCart();
-  }
-}
+    function confirmPaid(vId) {
+      if (confirm("Confirm you have sent the Swish payment?")) {
+        cart[vId].paid = true;
+        renderCart();
+      }
+    }
 
-function checkout() {
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  if(!name || !/^\d{10}$/.test(phone)) return alert("Please enter valid Name and 10-digit Phone");
+    function checkout() {
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      if (!name || !/^\d{10}$/.test(phone)) return alert("Please enter valid Name and 10-digit Phone");
 
-  // Create a version of the cart that includes the payment status for each vendor
-  fetch(`${API}/order`, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ name, phone, cart }) // cart already contains the .paid boolean
-  })
-  .then(res => res.json())
-  .then(() => {
-    alert("Order Successful!");
-    window.location.href = `orders.html?phone=${phone}`;
-  });
-}
+      // Create a version of the cart that includes the payment status for each vendor
+      fetch(`${API}/order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, cart }) // cart already contains the .paid boolean
+      })
+        .then(res => res.json())
+        .then(() => {
+          alert("Order Successful!");
+          window.location.href = `orders.html?phone=${phone}`;
+        });
+    }
 
-function openOrders() {
-  const phone = document.getElementById("phone").value.trim();
-  if(!phone) return alert("Enter your phone number first");
-  window.location.href = `orders.html?phone=${phone}`;
-}
-</script>
+    function openOrders() {
+      const phone = document.getElementById("phone").value.trim();
+      if (!phone) return alert("Enter your phone number first");
+      window.location.href = `orders.html?phone=${phone}`;
+    }
+  </script>
 </body>
+
 </html>
