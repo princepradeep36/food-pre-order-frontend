@@ -480,7 +480,6 @@
           ${!vCart.paid ?
             `<div style="display:flex; gap:5px;">
                <button class="pay-btn" onclick="payWithSwish(${vId}, ${vendorTotal})" style="margin:0; padding: 10px 15px; background: #E61E6D;">Pay with Swish</button>
-               <button class="pay-btn" onclick="confirmPaid(${vId})" style="margin:0; padding: 10px 15px;">Mark Paid</button>
              </div>` : ''}
         </div>
       </div>
@@ -499,7 +498,7 @@
         cartDiv.innerHTML = "<p style='text-align:center; color:#999;'>Your basket is empty</p>";
         checkoutBtn.disabled = true;
       } else {
-        checkoutBtn.disabled = !allPaid;
+        checkoutBtn.disabled = false; // Always allow checkout
       }
     }
 
@@ -521,12 +520,7 @@
       renderCart();
     }
 
-    function confirmPaid(vId) {
-      if (confirm("Confirm you have sent the Swish payment?")) {
-        cart[vId].paid = true;
-        renderCart();
-      }
-    }
+
 
     function checkout() {
       const name = document.getElementById("name").value.trim();
