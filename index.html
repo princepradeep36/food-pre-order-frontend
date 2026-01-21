@@ -478,7 +478,10 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <strong style="font-size: 1rem;">Total: ${vendorTotal}kr</strong>
           ${!vCart.paid ?
-            `<button class="pay-btn" onclick="confirmPaid(${vId})" style="margin:0; padding: 10px 15px;">Confirm Payment</button>` : ''}
+            `<div style="display:flex; gap:5px;">
+               <button class="pay-btn" onclick="payWithSwish(${vId}, ${vendorTotal})" style="margin:0; padding: 10px 15px; background: #E61E6D;">Pay with Swish</button>
+               <button class="pay-btn" onclick="confirmPaid(${vId})" style="margin:0; padding: 10px 15px;">Mark Paid</button>
+             </div>` : ''}
         </div>
       </div>
     `;
@@ -528,7 +531,13 @@
     function checkout() {
       const name = document.getElementById("name").value.trim();
       const phone = document.getElementById("phone").value.trim();
+      const btn = document.getElementById("checkoutBtn");
+
       if (!name || !/^\d{10}$/.test(phone)) return alert("Please enter valid Name and 10-digit Phone");
+
+      // Prevent duplicate orders
+      btn.disabled = true;
+      btn.innerText = "Processing...";
 
       // Create a version of the cart that includes the payment status for each vendor
       fetch(`${API}/order`, {
@@ -540,6 +549,13 @@
         .then(() => {
           alert("Order Successful!");
           window.location.href = `orders.html?phone=${phone}`;
+        })
+        .catch(err => {
+          alert("Error placing order. Please try again.");
+          console.error(err);
+          // Re-enable button on error
+          btn.disabled = false;
+          btn.innerText = "Confirm Order";
         });
     }
 
@@ -547,6 +563,21 @@
       const phone = document.getElementById("phone").value.trim();
       if (!phone) return alert("Enter your phone number first");
       window.location.href = `orders.html?phone=${phone}`;
+    }
+
+    function payWithSwish(vId, amount) {
+      const vendor = cart[vId];
+      if (!vendor || !vendor.swish) return alert("Vendor Swish number not found");
+
+      const swishData = {
+        version: 1,
+        payee: { value: vendor.swish },
+        amount: { value: amount },
+        message: { value: "Food Order" }
+      };
+
+      const url = `swish://payment?data=${encodeURIComponent(JSON.stringify(swishData))}`;
+      window.location.href = url;
     }
   </script>
 </body>
