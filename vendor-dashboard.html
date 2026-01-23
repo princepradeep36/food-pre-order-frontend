@@ -139,8 +139,15 @@
     <h2>Overall Event Sales Summary (Pongal 2026)</h2>
   </header>
   <script>
-    if (new URLSearchParams(window.location.search).get("admin") === "true") {
-      document.getElementById("back-link").style.display = "inline-block";
+    const params = new URLSearchParams(window.location.search);
+    const backLink = document.getElementById("back-link");
+
+    if (params.get("admin") === "true") {
+      backLink.href = "admin-hub.html";
+      backLink.style.display = "inline-block";
+    } else if (params.get("hub") === "vendor") {
+      backLink.href = "vendor-hub.html";
+      backLink.style.display = "inline-block";
     }
   </script>
 
