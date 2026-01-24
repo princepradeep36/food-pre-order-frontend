@@ -392,6 +392,17 @@
       const qty = Number(qtyInput.value);
       if (qty <= 0) return;
 
+      // Validation: Name and Phone required
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+
+      if (!name || !/^\d{10}$/.test(phone)) {
+        alert("Please enter valid Name and 10-digit Phone NUMBER before adding items.");
+        if (!name) document.getElementById("name").focus();
+        else document.getElementById("phone").focus();
+        return;
+      }
+
       // New check for max availability including current cart
       let currentInCart = 0;
       if (cart[vId]) {
