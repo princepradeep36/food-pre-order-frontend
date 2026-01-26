@@ -345,6 +345,16 @@
 
     let cart = {};
 
+    window.addEventListener("pageshow", function (event) {
+      // Reset form and cart on back navigation or fresh load
+      if (event.persisted || performance.getEntriesByType("navigation")[0].type === "back_forward") {
+        document.getElementById("name").value = "";
+        document.getElementById("phone").value = "";
+        cart = {};
+        renderCart();
+      }
+    });
+
     // LOAD VENDORS
     fetch(`${API}/vendors`)
       .then(res => {
@@ -549,34 +559,51 @@
 
 
     function checkout() {
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
       const btn = document.getElementById("checkoutBtn");
-
-      if (!name || !/^\d{10}$/.test(phone)) return alert("Please enter valid Name and 10-digit Phone");
-
       // Prevent duplicate orders
       btn.disabled = true;
       btn.innerText = "Processing...";
 
-      // Create a version of the cart that includes the payment status for each vendor
-      fetch(`${API}/order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, cart }) // cart already contains the .paid boolean
-      })
-        .then(res => res.json())
-        .then(() => {
-          alert("Order Successful!");
-          window.location.href = `orders.html?phone=${phone}`;
+      placeOrder(false).catch(() => {
+        // Re-enable button on error
+        btn.disabled = false;
+        btn.innerText = "Confirm Order";
+      });
+    }
+
+    function placeOrder(silent) {
+      return new Promise((resolve, reject) => {
+        const name = document.getElementById("name").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+
+        if (!name || !/^\d{10}$/.test(phone)) {
+          if (!silent) alert("Please enter valid Name and 10-digit Phone");
+          return reject("Invalid Input");
+        }
+
+        // Create a version of the cart that includes the payment status for each vendor
+        fetch(`${API}/order`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, phone, cart }) // cart already contains the .paid boolean
         })
-        .catch(err => {
-          alert("Error placing order. Please try again.");
-          console.error(err);
-          // Re-enable button on error
-          btn.disabled = false;
-          btn.innerText = "Confirm Order";
-        });
+          .then(res => res.json())
+          .then(() => {
+            if (silent) {
+              showToast("Order Updated");
+              resolve();
+            } else {
+              // No alert, just redirect
+              window.location.href = `orders.html?phone=${phone}`;
+              resolve();
+            }
+          })
+          .catch(err => {
+            if (!silent) alert("Error placing order. Please try again.");
+            console.error(err);
+            reject(err);
+          });
+      });
     }
 
     function openOrders() {
@@ -607,6 +634,7 @@
     function confirmPaid(vId) {
       cart[vId].paid = true;
       renderCart();
+      placeOrder(true);
     }
   </script>
 </body>
