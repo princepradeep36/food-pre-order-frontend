@@ -167,6 +167,7 @@
       font-weight: bold;
     }
   </style>
+  <script src="validation.js"></script>
 </head>
 
 <body>
@@ -229,7 +230,7 @@
 
           let menuHtml = v.menu.map(m => `
         <div class="menu-row">
-          <input id="name_${m.id}" value="${m.item_name}">
+          <input id="name_${m.id}" value="${Validation.escapeHtml(m.item_name)}">
           <input id="price_${m.id}" value="${m.price}" type="number" placeholder="Price">
           <input id="max_${m.id}" value="${m.max_quantity}" type="number" placeholder="Max Qty">
           <button class="btn-update" onclick="updateMenu(${m.id})">Save</button>
@@ -272,6 +273,7 @@
       const swish = document.getElementById("vswish").value;
 
       if (!name || !phone || !swish) return alert("All fields are required");
+      if (!Validation.isValidPhone(phone)) return alert("Invalid Phone Number (Must be 10 digits, not repeated/sequential)");
 
       try {
         const res = await fetch(`${API}/admin/vendor-full`, {

@@ -80,6 +80,7 @@
             font-weight: bold;
         }
     </style>
+    <script src="validation.js"></script>
 </head>
 
 <body>
@@ -133,7 +134,7 @@
                     div.className = "menu-item";
                     div.innerHTML = `
                         <div>
-                            <strong>${item.item_name}</strong> (${item.price}kr)
+                            <strong>${Validation.escapeHtml(item.item_name)}</strong> (${item.price}kr)
                             <span style="color:#666; font-size:0.8rem; margin-left:5px;">Max: ${item.max_quantity || '∞'}</span>
                         </div>
                         <button class="del-btn" onclick="delItem(${item.id})">Delete</button>

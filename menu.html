@@ -288,6 +288,7 @@
       }
     }
   </style>
+  <script src="validation.js"></script>
 </head>
 
 <body>
@@ -374,7 +375,7 @@
             <div class="item-actions">
               ${isSoldOut ? '<span style="color:red; font-weight:bold; font-size:0.85rem; padding: 5px;">SOLD OUT</span>' : `
               <input type="number" class="qty-input" value="1" min="1" max="${available}" id="qty_${m.id}">
-              <button class="btn-add" onclick="addToCart(${v.id}, '${v.name.replace(/'/g, "\\'")}', '${v.phone}', '${v.swish}', ${m.id}, '${m.item_name.replace(/'/g, "\\'")}', ${m.price}, ${available})">Add</button>
+              <button class="btn-add" onclick="addToCart(${v.id}, '${Validation.escapeJs(v.name)}', '${v.phone}', '${v.swish}', ${m.id}, '${Validation.escapeJs(m.item_name)}', ${m.price}, ${available})">Add</button>
               `}
             </div>
           </div>
@@ -396,11 +397,17 @@
       const name = document.getElementById("name").value.trim();
       const phone = document.getElementById("phone").value.trim();
 
-      if (!name || !/^\d{10}$/.test(phone)) {
-        alert("Please enter valid Name and 10-digit Phone NUMBER before adding items.");
+      if (!name || !Validation.isValidPhone(phone)) {
+        alert("Please enter a valid Name and 10-digit Phone NUMBER.\n\nNote: Repeated or sequential digits (e.g. 0000000000, 1234567890) are not allowed.");
         if (!name) document.getElementById("name").focus();
-        else document.getElementById("phone").focus();
+        else {
+          const p = document.getElementById("phone");
+          p.focus();
+          p.style.borderColor = "red";
+        }
         return;
+      } else {
+        document.getElementById("phone").style.borderColor = "#eee";
       }
 
       // New check for max availability including current cart
@@ -540,7 +547,7 @@
       const phone = document.getElementById("phone").value.trim();
       const btn = document.getElementById("checkoutBtn");
 
-      if (!name || !/^\d{10}$/.test(phone)) return alert("Please enter valid Name and 10-digit Phone");
+      if (!name || !Validation.isValidPhone(phone)) return alert("Please enter valid Name and Phone Number");
 
       // Prevent duplicate orders
       btn.disabled = true;

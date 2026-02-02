@@ -141,6 +141,7 @@
             }
         }
     </style>
+    <script src="validation.js"></script>
 </head>
 
 <body>
@@ -193,7 +194,7 @@
 
         async function loadPendingOrders() {
             const phone = document.getElementById("phone").value.trim();
-            if (!phone) return alert("Please enter your phone number");
+            if (!Validation.isValidPhone(phone)) return alert("Please enter a valid 10-digit phone number.");
 
             try {
                 const res = await fetch(`${API}/orders/${phone}`);
