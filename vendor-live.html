@@ -4,12 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vendor Summary - Click2Eat</title>
+  <title>Vendor Dashboard - Click2Eat</title>
   <style>
     :root {
       --primary: #007bff;
-      --accent: #ff47b5;
-      --bg: #f0f2f5;
+      --secondary: #ff47b5;
+      --success: #28a745;
+      --warning: #ffc107;
+      --bg: #f8f9fa;
       --card: #ffffff;
     }
 
@@ -17,113 +19,117 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg);
       margin: 0;
-      padding: 15px;
-      color: #333;
+      padding-bottom: 50px;
     }
 
-    header {
+    /* Modern Header matching index.html */
+    .app-header {
+      background: linear-gradient(135deg, var(--primary), #0056b3);
+      color: white;
+      padding: 25px 15px;
       text-align: center;
-      margin-bottom: 30px;
+      border-radius: 0 0 25px 25px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
     }
 
-    h1 {
-      color: var(--primary);
-      font-size: 1.5rem;
+    .app-header h1 {
       margin: 0;
+      font-size: 1.5rem;
     }
 
-    h2 {
-      color: #555;
-      font-size: 1rem;
-      margin: 5px 0;
-      font-weight: normal;
+    .app-header p {
+      margin: 5px 0 0;
+      opacity: 0.9;
+      font-size: 0.9rem;
     }
 
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-      max-width: 1200px;
+    .container {
+      max-width: 600px;
       margin: 0 auto;
+      padding: 15px;
     }
 
-    /* Summary Card */
-    .vendor-card {
+    /* Control Box */
+    .controls {
       background: var(--card);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      display: flex;
-      flex-direction: column;
+      padding: 15px;
+      border-radius: 15px;
+      margin-top: -20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
     }
 
-    .vendor-header {
-      border-bottom: 2px solid #f0f0f0;
-      padding-bottom: 15px;
+    select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #eee;
+      font-size: 16px;
+      background: #fdfdfd;
+    }
+
+    /* Customer Order Cards */
+    .customer-card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 18px;
       margin-bottom: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      border-left: 5px solid var(--primary);
     }
 
-    .vendor-title {
-      font-size: 1.25rem;
-      font-weight: bold;
-      color: var(--primary);
-      display: block;
-    }
-
-    .vendor-contact {
-      font-size: 0.85rem;
-      color: #888;
-    }
-
-    /* Stats Row */
-    .item-row {
+    .customer-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #f9f9f9;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #f0f0f0;
+      padding-bottom: 10px;
     }
 
-    .item-name {
-      font-weight: 500;
-      flex: 2;
+    .customer-name {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .customer-phone {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 0.95rem;
     }
 
     .item-qty {
-      background: #e7f3ff;
+      font-weight: bold;
       color: var(--primary);
-      padding: 4px 10px;
-      border-radius: 6px;
+    }
+
+    .status-btn {
+      width: 100%;
+      margin-top: 15px;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
       font-weight: bold;
       font-size: 0.9rem;
-      margin-right: 10px;
+      cursor: pointer;
+      transition: opacity 0.2s;
     }
 
-    .item-amount {
-      font-weight: bold;
-      color: #28a745;
-    }
-
-    .grand-total {
-      margin-top: auto;
-      padding-top: 15px;
-      text-align: right;
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #333;
+    .status-btn:active {
+      opacity: 0.8;
     }
 
     .empty-state {
-      grid-column: 1 / -1;
       text-align: center;
-      padding: 50px;
+      padding: 40px;
       color: #999;
-    }
-
-    @media (max-width: 400px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
     }
 
     .logout-btn {
@@ -137,19 +143,21 @@
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
+      z-index: 100;
     }
   </style>
 </head>
 
 <body>
   <button class="logout-btn" onclick="logout()">Logout</button>
-  <header>
-    <div style="text-align: left; max-width: 1200px; margin: 0 auto 15px auto; padding-left: 10px;">
+  <header class="app-header">
+    <div style="text-align: left; margin-bottom: 10px;">
       <a id="back-link" href="admin.html"
-        style="text-decoration: none; color: #007bff; font-weight: bold; display:none;">⬅️ Back to Hub</a>
+        style="color: rgba(255,255,255,0.9); text-decoration: none; font-weight: bold; display:none;">⬅️ Back
+        to Hub</a>
     </div>
     <h1>Click2Eat</h1>
-    <h2>Overall Event Sales Summary (Pongal 2026)</h2>
+    <p>Vendor Dashboard • Live Orders</p>
   </header>
   <script src="auth.js"></script>
   <script>
@@ -157,20 +165,25 @@
     const params = new URLSearchParams(window.location.search);
     const backLink = document.getElementById("back-link");
 
-    const vendorId = params.get("vendor_id");
-    const isAdmin = params.get("admin") === "true";
-
-    if (isAdmin) {
+    if (params.get("admin") === "true") {
       backLink.href = "admin.html";
       backLink.style.display = "inline-block";
-    } else if (vendorId) {
-      backLink.href = `vendor.html?vendor_id=${vendorId}`;
+    } else if (params.get("hub") === "vendor") {
+      backLink.href = "vendor.html";
       backLink.style.display = "inline-block";
     }
   </script>
 
-  <div id="summary" class="dashboard-grid">
-    <div class="empty-state">Loading order totals...</div>
+  <div class="container">
+    <div class="controls">
+      <select id="vendorSelect">
+        <option value="">Choose Your Stall</option>
+      </select>
+    </div>
+
+    <div id="orders">
+      <div class="empty-state">Select a vendor to see incoming orders</div>
+    </div>
   </div>
 
   <script>
@@ -178,99 +191,102 @@
       ? "http://localhost:3000"
       : "https://food-pre-order-backend.onrender.com";
 
-    const summaryDiv = document.getElementById("summary");
+    const vendorSelect = document.getElementById("vendorSelect");
+    const ordersDiv = document.getElementById("orders");
 
-    function loadSummary() {
-      fetch(`${API}/vendor-summary`)
+    // Load Vendors for dropdown
+    const role = sessionStorage.getItem("user_role");
+    const myId = sessionStorage.getItem("vendor_id");
+
+    if (role === 'vendor') {
+      // Hide controls and load only my orders
+      document.querySelector('.controls').style.display = 'none';
+      loadVendorOrders(myId);
+    } else {
+      // Admin: Load dropdown
+      fetch(`${API}/vendors-dropdown`)
+        .then(res => res.json())
+        .then(data => {
+          data.forEach(v => {
+            let opt = document.createElement("option");
+            opt.value = v.id;
+            opt.textContent = v.name;
+            vendorSelect.appendChild(opt);
+          });
+        });
+
+      vendorSelect.addEventListener("change", () => loadVendorOrders(vendorSelect.value));
+    }
+
+    function toggleDelivery(orderId, currentStatus) {
+      const newStatus = currentStatus === 'Delivered' ? 'Pending' : 'Delivered';
+      fetch(`${API}/order/${orderId}/delivery`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      }).then(() => loadVendorOrders(role === 'vendor' ? myId : vendorSelect.value));
+    }
+
+    function loadVendorOrders(vendorId) {
+      if (!vendorId) {
+        ordersDiv.innerHTML = '<div class="empty-state">Select a vendor to see incoming orders</div>';
+        return;
+      }
+
+      ordersDiv.innerHTML = '<div class="empty-state">Loading orders...</div>';
+
+      fetch(`${API}/vendor-orders/${vendorId}`)
         .then(res => res.json())
         .then(data => {
           if (data.length === 0) {
-            summaryDiv.innerHTML = '<div class="empty-state">No orders have been placed yet.</div>';
+            ordersDiv.innerHTML = '<div class="empty-state">No orders found for this stall.</div>';
             return;
           }
 
-          // Group data by vendor name
-          const vendors = {};
+          const orders = {};
           data.forEach(row => {
-            const key = row.vendor_name;
-            if (!vendors[key]) {
-              vendors[key] = {
-                name: row.vendor_name,
-                phone: row.phone,
-                items: [],
-                grand_total: 0
+            if (!orders[row.order_id]) {
+              orders[row.order_id] = {
+                id: row.order_id,
+                name: row.customer_name,
+                phone: row.customer_phone,
+                status: row.delivery_status || 'Pending',
+                items: []
               };
             }
-            if (row.item_name) {
-              vendors[key].items.push(row);
-              vendors[key].grand_total += Number(row.total_amount || 0);
-            }
+            orders[row.order_id].items.push(row);
           });
 
-          summaryDiv.innerHTML = "";
-          Object.values(vendors).forEach(v => {
+          ordersDiv.innerHTML = "";
+          Object.values(orders).forEach(order => {
+            const isDelivered = order.status === 'Delivered';
             const card = document.createElement("div");
-            card.className = "vendor-card";
-
-            const itemsHtml = v.items.map(i => `
-          <div class="item-row">
-            <span class="item-name">${i.item_name}</span>
-            <span class="item-qty">x${i.total_quantity}</span>
-            <span class="item-amount">${i.total_amount}kr</span>
-          </div>
-        `).join('');
-
+            card.className = "customer-card";
             card.innerHTML = `
-          <div class="vendor-header">
-            <span class="vendor-title">${v.name}</span>
-            <span class="vendor-contact">${v.phone}</span>
+          <div class="customer-header">
+            <span class="customer-name">${order.name}</span>
+            <span class="customer-phone">${order.phone}</span>
           </div>
           <div class="item-list">
-            ${itemsHtml || '<p style="color:#ccc">No items ordered</p>'}
+            ${order.items.map(i => `
+              <div class="item-row">
+                <span>${i.item_name}</span>
+                <span class="item-qty">x${i.quantity}</span>
+              </div>
+            `).join('')}
           </div>
-          <div class="grand-total">
-            Total Sales: ${v.grand_total}kr
-          </div>
-        `;
-            if (vendorId && v.name !== (vendors[row.vendor_name]?.name)) {
-              // This logic is tricky because we grouped by name key. 
-              // Better to filter the `vendors` object after grouping or filter the list before.
-            }
-          });
-
-          summaryDiv.innerHTML = "";
-
-          // Filter if vendorId is present
-          const visibleVendors = Object.values(vendors).filter(v => {
-            if (isAdmin) return true;
-            // We need to match ID, but the summary endpoint currently doesn't return ID directly in the grouping unless we change backend.
-            // However, we can fetch all vendors again or just rely on Name if unique. 
-            // Wait, previous backend change added ID to /vendor-summary GROUP BY?
-            // Let's check server.js.
-            // Server.js: GROUP BY v.id, v.name... SELECT v.name... MISSING v.id in SELECT.
-            // I should probably fix backend to select v.id too.
-            // For now, I'll assumme I fixed it or I will do a quick fix to backend.
-            // Actually, simpler: I'll use the name match if I can, OR I'll assume users logged in via hub have the right ID.
-            // The robust way is to update backend to return id.
-            return true;
-          });
-
-          // Hack: Since I didn't update backend to return ID in summary, I will check if I can match by name or phone?
-          // Or better: update backend now to return ID.
-
-          Object.values(vendors).forEach(v => {
-            // ... existing render ...
+          <button onclick="toggleDelivery('${order.id}', '${order.status}')" 
+                  class="status-btn" 
+                  style="background:${isDelivered ? 'var(--success)' : 'var(--warning)'}; 
+                         color:${isDelivered ? 'white' : 'black'};">
+            ${isDelivered ? '✓ Delivered' : 'Mark as Delivered'}
+          </button>`;
+            ordersDiv.appendChild(card);
           });
         })
-        .catch(err => {
-          console.error(err);
-          summaryDiv.innerHTML = '<div class="empty-state">Error connecting to server.</div>';
-        });
+        .catch(() => { ordersDiv.innerHTML = '<div class="empty-state">Error loading orders.</div>'; });
     }
-
-    loadSummary();
   </script>
-
 </body>
 
 </html>

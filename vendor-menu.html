@@ -115,7 +115,7 @@
             window.location.href = "login.html";
         }
 
-        document.getElementById("back-link").href = `vendor-hub.html?vendor_id=${vendorId}`;
+        document.getElementById("back-link").href = `vendor.html?vendor_id=${vendorId}`;
 
         async function loadMenu() {
             try {
@@ -158,6 +158,7 @@
 
             document.getElementById("vname").value = "";
             document.getElementById("vprice").value = "";
+            document.getElementById("vmax").value = "";
             loadMenu();
         }
 
