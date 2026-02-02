@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Vendor - STS Admin</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f4f7f9;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 8px;
+            display: none;
+            text-align: left;
+        }
+
+        .back-link {
+            display: block;
+            margin-bottom: 20px;
+            color: #666;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="admin-hub.html?admin=true" class="back-link">⬅️ Back to Hub</a>
+
+    <div class="container">
+        <h2 style="margin-top:0; color:#333;">Create New Vendor</h2>
+        <p style="color:#666; font-size:0.9rem;">Enter vendor details. Credentials will be auto-generated.</p>
+
+        <input id="vname" placeholder="Vendor Name (e.g. Dosa Corner)">
+        <input id="vphone" placeholder="Phone Number">
+        <input id="vswish" placeholder="Swish Number">
+
+        <button onclick="createVendor()">Create Vendor & Generate Login</button>
+
+        <div id="result" class="result">
+            <h3 style="margin:0 0 10px 0; color:#2e7d32;">Success!</h3>
+            <p><strong>Username:</strong> <span id="res-user"></span></p>
+            <p><strong>Password:</strong> <span id="res-pass"></span></p>
+            <p style="font-size:0.8rem; color:#666;">Please copy these credentials and share them with the vendor.</p>
+            <button onclick="location.reload()" style="background:#6c757d; margin-top:10px;">Create Another</button>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.hostname === "localhost" ? "http://localhost:3000" : "https://food-pre-order-backend.onrender.com";
+
+        async function createVendor() {
+            const name = document.getElementById("vname").value;
+            const phone = document.getElementById("vphone").value;
+            const swish = document.getElementById("vswish").value;
+
+            if (!name || !phone || !swish) return alert("All fields are required");
+
+            try {
+                const res = await fetch(`${API}/admin/vendor-full`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, phone, swish })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById("result").style.display = "block";
+                    document.getElementById("res-user").innerText = data.username;
+                    document.getElementById("res-pass").innerText = data.password;
+
+                    // Clear inputs
+                    document.getElementById("vname").value = "";
+                    document.getElementById("vphone").value = "";
+                    document.getElementById("vswish").value = "";
+                } else {
+                    alert("Error: " + JSON.stringify(data));
+                }
+            } catch (e) { alert("Failed to connect"); }
+        }
+    </script>
+
+</body>
+
+</html>

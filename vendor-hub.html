@@ -93,6 +93,11 @@
                 <div class="title">Sales Summary</div>
                 <div class="desc">Total sales report by vendor and item</div>
             </a>
+            <a href="#" id="menu-link" class="card">
+                <div class="icon">🍔</div>
+                <div class="title">Manage Menu</div>
+                <div class="desc">Add or remove items from your menu</div>
+            </a>
         </div>
     </div>
 
@@ -134,9 +139,10 @@
             window.location.href = "login.html";
         }
 
-        // Update Dashboard LInk
+        // Update Links
         document.getElementById("dash-link").href = `vendor-dashboard.html?vendor_id=${vendorId}`;
         document.getElementById("sum-link").href = `vendor-summary.html?vendor_id=${vendorId}`;
+        document.getElementById("menu-link").href = `vendor-menu.html?vendor_id=${vendorId}`;
 
         async function loadMenu() {
             try {
