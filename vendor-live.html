@@ -165,11 +165,15 @@
     const params = new URLSearchParams(window.location.search);
     const backLink = document.getElementById("back-link");
 
-    if (params.get("admin") === "true") {
+
+    const vendorIdParam = params.get("vendor_id");
+    const isAdmin = params.get("admin") === "true";
+
+    if (isAdmin) {
       backLink.href = "admin.html";
       backLink.style.display = "inline-block";
-    } else if (params.get("hub") === "vendor") {
-      backLink.href = "vendor.html";
+    } else if (vendorIdParam || params.get("hub") === "vendor") {
+      backLink.href = `vendor.html?vendor_id=${vendorIdParam || myId}`;
       backLink.style.display = "inline-block";
     }
   </script>

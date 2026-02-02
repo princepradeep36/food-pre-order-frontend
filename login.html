@@ -4,11 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Click2Eat Admin/Vendor</title>
+    <title>Login - Click2Eat</title>
     <style>
+        :root {
+            /* Using the blue and pink/purple palette from your dashboards */
+            --primary: #007bff;
+            --secondary: #ff47b5;
+            --gradient: linear-gradient(135deg, #007bff 0%, #ff47b5 100%);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f0f2f5;
+            background: #f0f2f5;
+            /* Decorative background shapes */
+            background-image: radial-gradient(circle at 20% 20%, rgba(0, 123, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(255, 71, 181, 0.05) 0%, transparent 40%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -18,47 +28,102 @@
 
         .login-card {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 380px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
-        h2 {
-            color: #333;
+        .brand-logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            text-align: left;
             margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #444;
+            margin-bottom: 8px;
+            margin-left: 4px;
         }
 
         input {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            padding: 14px 18px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
             box-sizing: border-box;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fdfdfd;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
         }
 
         button {
             width: 100%;
-            padding: 12px;
-            background: #007bff;
+            padding: 16px;
+            background: var(--gradient);
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 1rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
             cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
         }
 
         button:hover {
-            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
         }
 
         .error {
-            color: red;
-            font-size: 0.9rem;
-            margin-top: 10px;
+            background: #fff5f5;
+            color: #e03131;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-top: 20px;
             display: none;
+            border: 1px solid #ffc9c9;
+        }
+
+        /* Small footer note */
+        .footer-text {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: #aaa;
         }
     </style>
 </head>
@@ -66,11 +131,28 @@
 <body>
 
     <div class="login-card">
-        <h2>System Login</h2>
-        <input type="text" id="username" placeholder="Username">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="login()">Login</button>
-        <div id="error" class="error">Invalid Credentials</div>
+        <div class="brand-logo">Click2Eat</div>
+        <div class="subtitle">Vendor & Admin Portal Access</div>
+
+        <div class="input-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="Enter your username">
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+
+        <button onclick="login()">Sign In</button>
+
+        <div id="error" class="error">
+            <strong>Access Denied:</strong> Invalid Credentials
+        </div>
+
+        <div class="footer-text">
+            &copy; 2026 Click2Eat System
+        </div>
     </div>
 
     <script>
@@ -94,7 +176,6 @@
 
                 const data = await res.json();
 
-                // Store minimal info (in real app, use secure cookie/token)
                 sessionStorage.setItem("user_role", data.role);
                 sessionStorage.setItem("vendor_id", data.vendor_id || "");
 
