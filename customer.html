@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Hub - STS</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f4f7f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+        }
+
+        .hub-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #007bff;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-order {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+
+        .btn-pay {
+            background: linear-gradient(135deg, #ff9800, #e68a00);
+        }
+
+        .btn-receipts {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="hub-container">
+        <h1>Welcome Hungry!<br>STS Food Pre-Order</h1>
+
+        <a href="index.html" class="nav-btn btn-order">🍕 Create New Order</a>
+        <a href="payment.html" class="nav-btn btn-pay">💸 Pending Payments</a>
+        <a href="orders.html" class="nav-btn btn-receipts">🧾 My Receipts</a>
+    </div>
+
+</body>
+
+</html>

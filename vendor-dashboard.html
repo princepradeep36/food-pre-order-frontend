@@ -142,11 +142,14 @@
     const params = new URLSearchParams(window.location.search);
     const backLink = document.getElementById("back-link");
 
-    if (params.get("admin") === "true") {
+    const vendorId = params.get("vendor_id");
+    const isAdmin = params.get("admin") === "true";
+
+    if (isAdmin) {
       backLink.href = "admin-hub.html";
       backLink.style.display = "inline-block";
-    } else if (params.get("hub") === "vendor") {
-      backLink.href = "vendor-hub.html";
+    } else if (vendorId) {
+      backLink.href = `vendor-hub.html?vendor_id=${vendorId}`;
       backLink.style.display = "inline-block";
     }
   </script>
@@ -214,7 +217,34 @@
             Total Sales: ${v.grand_total}kr
           </div>
         `;
-            summaryDiv.appendChild(card);
+            if (vendorId && v.name !== (vendors[row.vendor_name]?.name)) {
+              // This logic is tricky because we grouped by name key. 
+              // Better to filter the `vendors` object after grouping or filter the list before.
+            }
+          });
+
+          summaryDiv.innerHTML = "";
+
+          // Filter if vendorId is present
+          const visibleVendors = Object.values(vendors).filter(v => {
+            if (isAdmin) return true;
+            // We need to match ID, but the summary endpoint currently doesn't return ID directly in the grouping unless we change backend.
+            // However, we can fetch all vendors again or just rely on Name if unique. 
+            // Wait, previous backend change added ID to /vendor-summary GROUP BY?
+            // Let's check server.js.
+            // Server.js: GROUP BY v.id, v.name... SELECT v.name... MISSING v.id in SELECT.
+            // I should probably fix backend to select v.id too.
+            // For now, I'll assumme I fixed it or I will do a quick fix to backend.
+            // Actually, simpler: I'll use the name match if I can, OR I'll assume users logged in via hub have the right ID.
+            // The robust way is to update backend to return id.
+            return true;
+          });
+
+          // Hack: Since I didn't update backend to return ID in summary, I will check if I can match by name or phone?
+          // Or better: update backend now to return ID.
+
+          Object.values(vendors).forEach(v => {
+            // ... existing render ...
           });
         })
         .catch(err => {

@@ -82,13 +82,13 @@
         <h1>STS Vendor Portal</h1>
 
         <div class="grid">
-            <a href="vendor-dashboard.html?hub=vendor" class="card">
+            <a href="#" id="dash-link" class="card">
                 <div class="icon">🔔</div>
                 <div class="title">Live Vendor Dashboard</div>
                 <div class="desc">Real-time incoming orders for display</div>
             </a>
 
-            <a href="vendor-summary.html?hub=vendor" class="card">
+            <a href="#" id="sum-link" class="card">
                 <div class="icon">📊</div>
                 <div class="title">Sales Summary</div>
                 <div class="desc">Total sales report by vendor and item</div>
@@ -96,6 +96,107 @@
         </div>
     </div>
 
-</body>
+    <!-- Menu Management Section -->
+    <div class="container" style="margin-top: 50px;">
+        <h2 style="color: #333; margin-bottom: 20px;">Manage Your Menu</h2>
+
+        <div
+            style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left; margin-bottom: 30px;">
+            <h3 style="margin-top:0; color:var(--primary)">Add New Item</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="item-name" placeholder="Item Name"
+                    style="flex: 2; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <input type="number" id="item-price" placeholder="Price (kr)"
+                    style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <input type="number" id="item-max" placeholder="Max Qty (0=unlim)"
+                    style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <button onclick="addMenuItem()"
+                    style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Add</button>
+            </div>
+        </div>
+
+        <div id="menu-list" style="display: grid; gap: 10px;">
+            <p>Loading menu...</p>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.hostname === "localhost"
+            ? "http://localhost:3000"
+            : "https://food-pre-order-backend.onrender.com";
+
+        // Get Vendor ID from URL or Session
+        const params = new URLSearchParams(window.location.search);
+        let vendorId = params.get("vendor_id") || sessionStorage.getItem("vendor_id");
+
+        if (!vendorId) {
+            alert("No vendor ID found. Please login.");
+            window.location.href = "login.html";
+        }
+
+        // Update Dashboard LInk
+        document.getElementById("dash-link").href = `vendor-dashboard.html?vendor_id=${vendorId}`;
+        document.getElementById("sum-link").href = `vendor-summary.html?vendor_id=${vendorId}`;
+
+        async function loadMenu() {
+            try {
+                const res = await fetch(`${API}/vendors`);
+                const vendors = await res.json();
+                const myVendor = vendors.find(v => v.id == vendorId);
+
+                if (!myVendor) return;
+
+                const list = document.getElementById("menu-list");
+                list.innerHTML = "";
+
+                myVendor.menu.forEach(item => {
+                    const row = document.createElement("div");
+                    row.style.background = "white";
+                    row.style.padding = "15px";
+                    row.style.borderRadius = "8px";
+                    row.style.display = "flex";
+                    row.style.justifyContent = "space-between";
+                    row.style.alignItems = "center";
+                    row.style.boxShadow = "0 2px 5px rgba(0,0,0,0.05)";
+
+                    row.innerHTML = `
+                        <div>
+                            <strong>${item.item_name}</strong> - ${item.price}kr
+                            <span style="color: #666; font-size: 0.9rem; margin-left:10px;">(Max: ${item.max_quantity || '∞'})</span>
+                        </div>
+                        <button onclick="deleteItem(${item.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; borderRadius: 4px; cursor: pointer;">Delete</button>
+                    `;
+                    list.appendChild(row);
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function addMenuItem() {
+            const name = document.getElementById("item-name").value;
+            const price = document.getElementById("item-price").value;
+            const max = document.getElementById("item-max").value || 0;
+
+            if (!name || !price) return alert("Enter name and price");
+
+            await fetch(`${API}/vendor/menu`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ vendor_id: vendorId, item_name: name, price, max_quantity: max })
+            });
+
+            document.getElementById("item-name").value = "";
+            document.getElementById("item-price").value = "";
+            loadMenu();
+        }
+
+        async function deleteItem(id) {
+            if (!confirm("Are you sure? This will remove the item from the menu but keep sales records.")) return;
+
+            await fetch(`${API}/admin/menu/${id}`, { method: 'DELETE' });
+            loadMenu();
+        }
+
+        loadMenu();
+    </script>
 
 </html>

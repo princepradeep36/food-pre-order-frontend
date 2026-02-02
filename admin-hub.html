@@ -106,8 +106,74 @@
                 <div class="desc">Total sales report by vendor and item</div>
             </a>
         </div>
+
+        <!-- Vendor User Creation Section -->
+        <div
+            style="margin-top: 50px; background: white; padding: 30px; border-radius: 12px; max-width: 500px; margin-left: auto; margin-right: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left;">
+            <h2 style="color: var(--primary); text-align: center;">Create Vendor Login</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <select id="vendor-select" style="padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                    <option value="">Select Vendor</option>
+                </select>
+                <input type="text" id="new-username" placeholder="New Username"
+                    style="padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                <input type="text" id="new-password" placeholder="New Password"
+                    style="padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                <button onclick="createVendorUser()"
+                    style="padding: 12px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Create
+                    User</button>
+            </div>
+            <p id="msg" style="text-align: center; margin-top: 15px;"></p>
+        </div>
+
     </div>
 
-</body>
+    <script>
+        const API = window.location.hostname === "localhost"
+            ? "http://localhost:3000"
+            : "https://food-pre-order-backend.onrender.com";
+
+        // Load Vendors for Dropdown
+        fetch(`${API}/vendors-dropdown`)
+            .then(res => res.json())
+            .then(data => {
+                const sel = document.getElementById("vendor-select");
+                data.forEach(v => {
+                    const opt = document.createElement("option");
+                    opt.value = v.id;
+                    opt.innerText = v.name;
+                    sel.appendChild(opt);
+                });
+            });
+
+        async function createVendorUser() {
+            const vendorId = document.getElementById("vendor-select").value;
+            const username = document.getElementById("new-username").value;
+            const password = document.getElementById("new-password").value;
+            const msg = document.getElementById("msg");
+
+            if (!vendorId || !username || !password) return alert("Fill all fields");
+
+            try {
+                const res = await fetch(`${API}/admin/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, role: 'vendor', vendor_id: vendorId })
+                });
+
+                if (res.ok) {
+                    msg.innerText = "Check! User created successfully.";
+                    msg.style.color = "green";
+                    document.getElementById("new-username").value = "";
+                    document.getElementById("new-password").value = "";
+                } else {
+                    throw new Error("Failed");
+                }
+            } catch (err) {
+                msg.innerText = "Error creating user.";
+                msg.style.color = "red";
+            }
+        }
+    </script>
 
 </html>
