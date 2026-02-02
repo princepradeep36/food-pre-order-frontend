@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Payments - STS</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --bg: #f4f7f9;
+            --card: #ffffff;
+            --text: #333;
+            --accent: #ff9800;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header-box {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .search-section {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button.primary-btn {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Receipt Card Style */
+        .receipt-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--accent);
+        }
+
+        .vendor-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 8px;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 0.95rem;
+        }
+
+        .total-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .payment-actions {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-swish {
+            background: #E61E6D;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-mark-paid {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+            /* Hidden until Swish clicked */
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header-box">
+            <h2 style="color: #476cff;">Skane Tamil Sangam</h2>
+            <h4 style="color: var(--accent);">Pending Payments</h4>
+        </div>
+
+        <div class="search-section">
+            <input type="tel" id="phone" placeholder="Enter 10-digit Phone Number">
+            <button class="primary-btn" onclick="loadPendingOrders()">Find Pending Payments</button>
+        </div>
+
+        <div id="orders"></div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="orders.html" style="color: #666; text-decoration: underline;">Go to My Receipts</a>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.hostname === "localhost"
+            ? "http://localhost:3000"
+            : "https://food-pre-order-backend.onrender.com";
+
+        const ordersDiv = document.getElementById("orders");
+        let vendorsCache = {};
+
+        // Auto-load if phone is in URL
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const phone = params.get("phone");
+            if (phone) {
+                document.getElementById("phone").value = phone;
+                loadVendors().then(loadPendingOrders);
+            } else {
+                loadVendors();
+            }
+        };
+
+        async function loadVendors() {
+            try {
+                const res = await fetch(`${API}/vendors`);
+                const vendors = await res.json();
+                vendors.forEach(v => vendorsCache[v.name] = v); // Map by name for easy lookup
+            } catch (e) { console.error("Error loading vendors", e); }
+        }
+
+        async function loadPendingOrders() {
+            const phone = document.getElementById("phone").value.trim();
+            if (!phone) return alert("Please enter your phone number");
+
+            try {
+                const res = await fetch(`${API}/orders/${phone}`);
+                const allOrders = await res.json();
+
+                // Filter for UNPAID orders
+                const pendingOrders = allOrders.filter(o => o.payment_status !== 'PAID');
+
+                ordersDiv.innerHTML = "";
+                if (pendingOrders.length === 0) {
+                    ordersDiv.innerHTML = `<div style="text-align:center; padding:20px;">No pending payments found! <br><a href="orders.html?phone=${phone}">View Receipts</a></div>`;
+                    return;
+                }
+
+                for (const order of pendingOrders) {
+                    const card = document.createElement("div");
+                    card.className = "receipt-card";
+                    card.id = `order-card-${order.id}`;
+
+                    // Find vendor details for swish
+                    const vendorDetails = vendorsCache[order.vendor];
+                    const swishNum = vendorDetails ? vendorDetails.swish : '';
+
+                    card.innerHTML = `
+          <div class="vendor-name">${order.vendor}</div>
+          <div style="font-size:0.85rem; color:#666; margin-bottom:10px;">Swish: ${swishNum}</div>
+          
+          <div id="items_${order.id}" style="min-height: 40px; margin-bottom: 10px;">
+            <p style="color: #999; font-size: 0.8rem;">Loading items...</p>
+          </div>
+          
+          <div class="total-section">
+            <span>Amount Due</span>
+            <span>${order.total}kr</span>
+          </div>
+
+          <div class="payment-actions">
+            <button class="btn-swish" onclick="payWithSwish(${order.id}, '${swishNum}', ${order.total})">Pay with Swish</button>
+            <button class="btn-mark-paid" id="btn-paid-${order.id}" onclick="markAsPaid(${order.id})">Mark as Paid</button>
+          </div>
+        `;
+                    ordersDiv.appendChild(card);
+                    fetchItems(order.id);
+                }
+            } catch (err) {
+                alert("Error loading orders. Check your connection.");
+                console.error(err);
+            }
+        }
+
+        async function fetchItems(orderId) {
+            try {
+                const res = await fetch(`${API}/order/${orderId}/details`);
+                const items = await res.json();
+                const container = document.getElementById(`items_${orderId}`);
+
+                container.innerHTML = items.map(i => `
+        <div class="item-row">
+          <div style="flex: 2;">${i.item_name}</div>
+          <div style="flex: 1; text-align: center; color: #666;">x${i.quantity}</div>
+          <div style="flex: 1; text-align: right;">${i.price * i.quantity}kr</div>
+        </div>
+      `).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function payWithSwish(orderId, swishNum, amount) {
+            if (!swishNum) return alert("Vendor Swish number not found");
+
+            const swishData = {
+                version: 1,
+                payee: { value: swishNum },
+                amount: { value: amount },
+                message: { value: "Food Order" }
+            };
+
+            const url = `swish://payment?data=${encodeURIComponent(JSON.stringify(swishData))}`;
+            window.location.href = url;
+
+            // Show "Mark as Paid" button
+            document.getElementById(`btn-paid-${orderId}`).style.display = "block";
+        }
+
+        async function markAsPaid(orderId) {
+            const btn = document.getElementById(`btn-paid-${orderId}`);
+            btn.disabled = true;
+            btn.innerText = "Updating...";
+
+            try {
+                const res = await fetch(`${API}/order/${orderId}/pay`, { method: 'PUT' });
+                if (!res.ok) throw new Error("Failed to update");
+
+                // Remove card from view
+                const card = document.getElementById(`order-card-${orderId}`);
+                card.style.opacity = '0.5';
+                setTimeout(() => {
+                    card.remove();
+                    // check if empty
+                    if (document.getElementById("orders").children.length === 0) {
+                        const phone = document.getElementById("phone").value;
+                        document.getElementById("orders").innerHTML = `<div style="text-align:center; padding:20px;">All paid! <br><a href="orders.html?phone=${phone}">View Receipts</a></div>`;
+                    }
+                }, 500);
+
+            } catch (err) {
+                alert("Error updating payment status. Try again.");
+                btn.disabled = false;
+                btn.innerText = "Mark as Paid";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

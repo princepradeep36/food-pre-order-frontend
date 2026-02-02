@@ -416,7 +416,7 @@
       }
 
       if (!cart[vId]) {
-        cart[vId] = { vendor: vName, phone: vPhone, swish: vSwish, items: [], paid: false };
+        cart[vId] = { vendor: vName, phone: vPhone, swish: vSwish, items: [] };
       }
 
       const existing = cart[vId].items.find(i => i.id === mId);
@@ -453,14 +453,14 @@
       const totalQtyLabel = document.getElementById("total-qty");
 
       cartDiv.innerHTML = "";
-      let allPaid = true;
+      let allPaid = true; // Not strictly needed anymore but kept for minimal diff
       let hasItems = false;
       let totalQty = 0;
 
       for (const vId in cart) {
         hasItems = true;
         const vCart = cart[vId];
-        if (!vCart.paid) allPaid = false;
+        if (!vCart.paid) allPaid = false; // logic kept but allPaid not used for disabling checkout anymore
         let vendorTotal = 0;
 
         const itemsHtml = vCart.items.map((item) => {
@@ -481,32 +481,19 @@
       `;
         }).join('');
 
-        // --- Updated UI Block ---
+      // --- Updated UI Block ---
         cartDiv.innerHTML += `
-      <div class="vendor-pay-block" style="border-left: 4px solid ${vCart.paid ? '#28a745' : '#ff9800'}; padding: 12px; background: #fffdf9; margin-bottom: 20px; border-radius: 0 10px 10px 0; box-shadow: 2px 2px 5px rgba(0,0,0,0.05);">
+      <div class="vendor-cart-block" style="padding: 12px; background: #fffdf9; margin-bottom: 20px; border-radius: 10px; border: 1px solid #ddd;">
         <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom: 5px;">
            <strong style="font-size: 1.1rem; color: #333;">${vCart.vendor}</strong>
-           ${vCart.paid ? '<span style="color:green; font-weight:bold;">Paid ✅</span>' : '<span style="color:#e67e22; font-size:0.8rem; font-weight:bold;">Awaiting Payment</span>'}
         </div>
         
-        <div style="font-size: 0.85rem; color: #666; margin-bottom: 10px;">
-          <span>📞 Contact: ${vCart.phone}</span><br>
-          <span style="color: #007bff; font-weight: bold;">💸 Swish: ${vCart.swish}</span>
-        </div>
-
         <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 10px;">
           ${itemsHtml}
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; justify-content: flex-end; align-items: center;">
           <strong style="font-size: 1rem;">Total: ${vendorTotal}kr</strong>
-          ${!vCart.paid ?
-            `<div style="display:flex; gap:5px;">
-               <button class="pay-btn" onclick="payWithSwish(${vId}, ${vendorTotal})" style="margin:0; padding: 10px 15px; background: #E61E6D;">Pay with Swish</button>
-               ${vCart.swishOpened ?
-              `<button class="pay-btn" onclick="confirmPaid(${vId})" style="margin:0; padding: 10px 15px; animation: fadeIn 0.5s;">Mark Paid</button>`
-              : ''}
-             </div>` : ''}
         </div>
       </div>
     `;
@@ -524,7 +511,7 @@
         cartDiv.innerHTML = "<p style='text-align:center; color:#999;'>Your basket is empty</p>";
         checkoutBtn.disabled = true;
       } else {
-        checkoutBtn.disabled = !allPaid;
+        checkoutBtn.disabled = false;
       }
     }
 
@@ -563,12 +550,15 @@
       fetch(`${API}/order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, cart }) // cart already contains the .paid boolean
+        body: JSON.stringify({ name, phone, cart })
       })
         .then(res => res.json())
         .then(() => {
-          alert("Order Successful!");
-          window.location.href = `orders.html?phone=${phone}`;
+          // Re-enable in case user comes back, though we redirect
+          btn.disabled = false; 
+          btn.innerText = "Confirm Order";
+          
+          window.location.href = `payment.html?phone=${phone}`;
         })
         .catch(err => {
           alert("Error placing order. Please try again.");
@@ -585,29 +575,7 @@
       window.location.href = `orders.html?phone=${phone}`;
     }
 
-    function payWithSwish(vId, amount) {
-      const vendor = cart[vId];
-      if (!vendor || !vendor.swish) return alert("Vendor Swish number not found");
-
-      const swishData = {
-        version: 1,
-        payee: { value: vendor.swish },
-        amount: { value: amount },
-        message: { value: "Food Order" }
-      };
-
-      const url = `swish://payment?data=${encodeURIComponent(JSON.stringify(swishData))}`;
-      window.location.href = url;
-
-      // Enable the "Mark as Paid" button
-      cart[vId].swishOpened = true;
-      renderCart();
-    }
-
-    function confirmPaid(vId) {
-      cart[vId].paid = true;
-      renderCart();
-    }
+    // Removed payWithSwish and confirmPaid functions as they are moved to payment.html
   </script>
 </body>
 

@@ -225,6 +225,9 @@
                     <div class="order-meta">
                         <div>Vendor: <strong>${order.vendor_name}</strong></div>
                         <div style="font-size:0.8rem; margin-top:4px;">${new Date(order.created_at).toLocaleString()}</div>
+                        <div style="margin-top:5px; font-weight:bold; color:${order.payment_status === 'PAID' ? 'green' : 'orange'}">
+                            ${order.payment_status === 'PAID' ? 'PAID ✅' : 'UNPAID ⏳'}
+                        </div>
                     </div>
                 </div>
 

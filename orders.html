@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,7 +35,7 @@
       background: var(--card);
       padding: 20px;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       margin-bottom: 20px;
     }
 
@@ -44,7 +45,8 @@
       margin: 8px 0;
       border: 1.5px solid #ddd;
       border-radius: 8px;
-      font-size: 16px; /* Prevents iOS zoom on focus */
+      font-size: 16px;
+      /* Prevents iOS zoom on focus */
       box-sizing: border-box;
     }
 
@@ -66,7 +68,7 @@
       border-radius: 12px;
       padding: 15px;
       margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       border-top: 4px solid var(--primary);
     }
 
@@ -88,9 +90,21 @@
       font-size: 0.95rem;
     }
 
-    .item-info { flex: 2; }
-    .item-qty { flex: 1; text-align: center; color: #666; }
-    .item-price { flex: 1; text-align: right; font-weight: 500; }
+    .item-info {
+      flex: 2;
+    }
+
+    .item-qty {
+      flex: 1;
+      text-align: center;
+      color: #666;
+    }
+
+    .item-price {
+      flex: 1;
+      text-align: right;
+      font-weight: 500;
+    }
 
     .total-section {
       margin-top: 12px;
@@ -112,57 +126,65 @@
     }
   </style>
 </head>
+
 <body>
 
-<div class="container">
-  <div class="header-box">
-    <h2 style="color: #476cff;">Skane Tamil Sangam</h2>
-    <h4 style="color: #ff47b5;">My Receipts</h4>
+  <div class="container">
+    <div class="header-box">
+      <h2 style="color: #476cff;">Skane Tamil Sangam</h2>
+      <h4 style="color: #ff47b5;">My Receipts</h4>
+    </div>
+
+    <div class="search-section">
+      <input type="tel" id="phone" placeholder="Enter 10-digit Phone Number">
+      <button class="primary-btn" onclick="loadOrders()">View My Receipts</button>
+    </div>
+
+    <div id="orders"></div>
   </div>
 
-  <div class="search-section">
-    <input type="tel" id="phone" placeholder="Enter 10-digit Phone Number">
-    <button class="primary-btn" onclick="loadOrders()">View My Receipts</button>
-  </div>
+  <script>
+    const API = window.location.hostname === "localhost"
+      ? "http://localhost:3000"
+      : "https://food-pre-order-backend.onrender.com";
 
-  <div id="orders"></div>
-</div>
+    const ordersDiv = document.getElementById("orders");
 
-<script>
-  const API = window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://food-pre-order-backend.onrender.com";
-
-  const ordersDiv = document.getElementById("orders");
-
-  // Auto-load if phone is in URL
-  window.onload = () => {
-    const params = new URLSearchParams(window.location.search);
-    const phone = params.get("phone");
-    if (phone) {
-      document.getElementById("phone").value = phone;
-      loadOrders();
-    }
-  };
-
-  async function loadOrders() {
-    const phone = document.getElementById("phone").value.trim();
-    if (!phone) return alert("Please enter your phone number");
-
-    try {
-      const res = await fetch(`${API}/orders/${phone}`);
-      const data = await res.json();
-      
-      ordersDiv.innerHTML = "";
-      if (data.length === 0) {
-        ordersDiv.innerHTML = `<div style="text-align:center; padding:20px;">No orders found for this number.</div>`;
-        return;
+    // Auto-load if phone is in URL
+    window.onload = () => {
+      const params = new URLSearchParams(window.location.search);
+      const phone = params.get("phone");
+      if (phone) {
+        document.getElementById("phone").value = phone;
+        loadOrders();
       }
+    };
 
-      for (const order of data) {
-        const card = document.createElement("div");
-        card.className = "receipt-card";
-        card.innerHTML = `
+    async function loadOrders() {
+      const phone = document.getElementById("phone").value.trim();
+      if (!phone) return alert("Please enter your phone number");
+
+      try {
+        const res = await fetch(`${API}/orders/${phone}`);
+        const data = await res.json();
+
+        ordersDiv.innerHTML = "";
+        if (data.length === 0) {
+          ordersDiv.innerHTML = `<div style="text-align:center; padding:20px;">No orders found for this number.</div>`;
+          return;
+        }
+
+        const paidOrders = data.filter(o => o.payment_status === 'PAID');
+
+        if (paidOrders.length === 0) {
+          ordersDiv.innerHTML = `<div style="text-align:center; padding:20px;">No paid receipts found.<br><br><a href="payment.html?phone=${phone}" style="color:var(--primary)">Check Pending Payments</a></div>`;
+          return;
+        }
+
+        for (const order of paidOrders) {
+          const card = document.createElement("div");
+          card.className = "receipt-card";
+          card.innerHTML = `
           <div class="vendor-name">${order.vendor}</div>
           <div id="items_${order.id}" style="min-height: 40px;">
             <p style="color: #999; font-size: 0.8rem;">Loading items...</p>
@@ -172,32 +194,33 @@
             <span>${order.total}kr</span>
           </div>
         `;
-        ordersDiv.appendChild(card);
-        fetchItems(order.id);
+          ordersDiv.appendChild(card);
+          fetchItems(order.id);
+        }
+      } catch (err) {
+        alert("Error loading orders. Check your connection.");
       }
-    } catch (err) {
-      alert("Error loading orders. Check your connection.");
     }
-  }
 
-  async function fetchItems(orderId) {
-    try {
-      const res = await fetch(`${API}/order/${orderId}/details`);
-      const items = await res.json();
-      const container = document.getElementById(`items_${orderId}`);
-      
-      container.innerHTML = items.map(i => `
+    async function fetchItems(orderId) {
+      try {
+        const res = await fetch(`${API}/order/${orderId}/details`);
+        const items = await res.json();
+        const container = document.getElementById(`items_${orderId}`);
+
+        container.innerHTML = items.map(i => `
         <div class="item-row">
           <div class="item-info">${i.item_name}</div>
           <div class="item-qty">x${i.quantity}</div>
           <div class="item-price">${i.price * i.quantity}kr</div>
         </div>
       `).join('');
-    } catch (err) {
-      console.error(err);
+      } catch (err) {
+        console.error(err);
+      }
     }
-  }
-</script>
+  </script>
 
 </body>
+
 </html>
