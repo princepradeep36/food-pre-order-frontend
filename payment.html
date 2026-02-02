@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pending Payments - STS</title>
+    <title>Pending Payments - Click2Eat</title>
     <style>
         :root {
             --primary: #007bff;
@@ -147,7 +147,7 @@
 
     <div class="container">
         <div class="header-box">
-            <h2 style="color: #476cff;">Skane Tamil Sangam</h2>
+            <h2 style="color: #476cff;">Click2Eat</h2>
             <h4 style="color: var(--accent);">Pending Payments</h4>
         </div>
 
@@ -159,7 +159,7 @@
         <div id="orders"></div>
 
         <div style="text-align: center; margin-top: 30px;">
-            <a href="orders.html" style="color: #666; text-decoration: underline;">Go to My Receipts</a>
+            <a href="receipts.html" style="color: #666; text-decoration: underline;">Go to My Receipts</a>
         </div>
     </div>
 
@@ -204,7 +204,7 @@
 
                 ordersDiv.innerHTML = "";
                 if (pendingOrders.length === 0) {
-                    ordersDiv.innerHTML = `<div style="text-align:center; padding:20px;">No pending payments found! <br><a href="orders.html?phone=${phone}">View Receipts</a></div>`;
+                    ordersDiv.innerHTML = `<div style="text-align:center; padding:20px;">No pending payments found! <br><a href="receipts.html?phone=${phone}">View Receipts</a></div>`;
                     return;
                 }
 
@@ -296,7 +296,7 @@
                     // check if empty
                     if (document.getElementById("orders").children.length === 0) {
                         const phone = document.getElementById("phone").value;
-                        document.getElementById("orders").innerHTML = `<div style="text-align:center; padding:20px;">All paid! <br><a href="orders.html?phone=${phone}">View Receipts</a></div>`;
+                        document.getElementById("orders").innerHTML = `<div style="text-align:center; padding:20px;">All paid! <br><a href="receipts.html?phone=${phone}">View Receipts</a></div>`;
                     }
                 }, 500);
 

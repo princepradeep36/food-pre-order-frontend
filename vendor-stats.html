@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vendor Dashboard - STS</title>
+  <title>Vendor Dashboard - Click2Eat</title>
   <style>
     :root {
       --primary: #007bff;
@@ -131,29 +131,45 @@
       padding: 40px;
       color: #999;
     }
+
+    .logout-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      z-index: 100;
+    }
   </style>
 </head>
 
 <body>
-
+  <button class="logout-btn" onclick="logout()">Logout</button>
   <header class="app-header">
     <div style="text-align: left; margin-bottom: 10px;">
-      <a id="back-link" href="admin-hub.html"
+      <a id="back-link" href="admin.html"
         style="color: rgba(255,255,255,0.9); text-decoration: none; font-weight: bold; display:none;">⬅️ Back
         to Hub</a>
     </div>
-    <h1>Skane Tamil Sangam</h1>
+    <h1>Click2Eat</h1>
     <p>Vendor Dashboard • Live Orders</p>
   </header>
+  <script src="auth.js"></script>
   <script>
+    checkAuth('any');
     const params = new URLSearchParams(window.location.search);
     const backLink = document.getElementById("back-link");
 
     if (params.get("admin") === "true") {
-      backLink.href = "admin-hub.html";
+      backLink.href = "admin.html";
       backLink.style.display = "inline-block";
     } else if (params.get("hub") === "vendor") {
-      backLink.href = "vendor-hub.html";
+      backLink.href = "vendor.html";
       backLink.style.display = "inline-block";
     }
   </script>

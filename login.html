@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - STS Admin/Vendor</title>
+    <title>Login - Click2Eat Admin/Vendor</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -99,9 +99,9 @@
                 sessionStorage.setItem("vendor_id", data.vendor_id || "");
 
                 if (data.role === 'admin') {
-                    window.location.href = "admin-hub.html?admin=true";
+                    window.location.href = "admin.html?admin=true";
                 } else if (data.role === 'vendor') {
-                    window.location.href = `vendor-hub.html?vendor_id=${data.vendor_id}`;
+                    window.location.href = `vendor.html?vendor_id=${data.vendor_id}`;
                 }
             } catch (err) {
                 errDiv.style.display = "block";

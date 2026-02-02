@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Menu - STS Vendor</title>
+    <title>Manage Menu - Click2Eat Vendor</title>
     <style>
         body {
             font-family: sans-serif;
@@ -66,11 +66,24 @@
             background: #dc3545;
             font-size: 0.8rem;
         }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
     </style>
 </head>
 
 <body>
-
+    <button class="logout-btn" onclick="logout()">Logout</button>
     <div class="container">
         <a href="#" id="back-link" class="back-link">⬅️ Back to Hub</a>
 
@@ -89,7 +102,9 @@
         <div id="list">Loading...</div>
     </div>
 
+    <script src="auth.js"></script>
     <script>
+        checkAuth('vendor');
         const API = window.location.hostname === "localhost" ? "http://localhost:3000" : "https://food-pre-order-backend.onrender.com";
 
         const params = new URLSearchParams(window.location.search);

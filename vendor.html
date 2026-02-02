@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STS Admin Portal</title>
+    <title>Click2Eat Vendor Portal</title>
     <style>
         :root {
             --primary: #007bff;
@@ -20,6 +20,19 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
         }
 
         .container {
@@ -77,45 +90,55 @@
 </head>
 
 <body>
-
+    <button class="logout-btn" onclick="logout()">Logout</button>
     <div class="container">
-        <h1>STS Admin Portal</h1>
+        <h1>Click2Eat Vendor Portal</h1>
 
         <div class="grid">
-            <a href="admin-orders.html?admin=true" class="card">
-                <div class="icon">📦</div>
-                <div class="title">Order Manager</div>
-                <div class="desc">View, edit, and delete customer orders</div>
-            </a>
-
-            <a href="admin.html?admin=true" class="card">
-                <div class="icon">🏪</div>
-                <div class="title">Stall & Menu Admin</div>
-                <div class="desc">Manage vendors and update menu items</div>
-            </a>
-
-            <a href="vendor-dashboard.html?admin=true" class="card">
+            <a href="#" id="dash-link" class="card">
                 <div class="icon">🔔</div>
                 <div class="title">Live Vendor Dashboard</div>
                 <div class="desc">Real-time incoming orders for display</div>
             </a>
 
-            <a href="vendor-summary.html?admin=true" class="card">
+            <a href="#" id="sum-link" class="card">
                 <div class="icon">📊</div>
                 <div class="title">Sales Summary</div>
                 <div class="desc">Total sales report by vendor and item</div>
             </a>
-            <a href="admin-create-vendor.html?admin=true" class="card">
-                <div class="icon">➕</div>
-                <div class="title">Create Vendor</div>
-                <div class="desc">Register new vendor & generate login</div>
+            <a href="#" id="menu-link" class="card">
+                <div class="icon">🍔</div>
+                <div class="title">Manage Menu</div>
+                <div class="desc">Add or remove items from your menu</div>
             </a>
         </div>
     </div>
 
+    <!-- Menu Management Section Removed -->
+
+    <script src="auth.js"></script>
     <script>
-        // Scripts cleaned up as inline logic removed
+        checkAuth('vendor');
+
+        const API = window.location.hostname === "localhost"
+            ? "http://localhost:3000"
+            : "https://food-pre-order-backend.onrender.com";
+
+        // Get Vendor ID from URL or Session
+        const params = new URLSearchParams(window.location.search);
+        let vendorId = params.get("vendor_id") || sessionStorage.getItem("vendor_id");
+
+        if (!vendorId) {
+            alert("No vendor ID found. Please login.");
+            window.location.href = "login.html";
+        }
+
+        // Update Links
+        document.getElementById("dash-link").href = `vendor-live.html?vendor_id=${vendorId}`;
+        document.getElementById("sum-link").href = `vendor-stats.html?vendor_id=${vendorId}`;
+        document.getElementById("menu-link").href = `vendor-menu.html?vendor_id=${vendorId}`;
+
+        // Legacy menu script removed
     </script>
-</body>
 
 </html>

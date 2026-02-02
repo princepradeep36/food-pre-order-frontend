@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STS - Order Manager</title>
+    <title>Click2Eat - Order Manager</title>
     <style>
         :root {
             --primary: #007bff;
@@ -159,22 +159,41 @@
             padding: 40px;
             color: #666;
         }
+
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
     </style>
 </head>
 
 <body>
 
+
+    <button class="logout-btn" onclick="logout()">Logout</button>
     <div class="container">
         <header>
             <div style="flex:1">
-                <a id="back-link" href="admin-hub.html"
+                <a id="back-link" href="admin.html"
                     style="text-decoration: none; color: #666; font-size: 0.9rem; font-weight:bold; display:none;">⬅️
                     Back to Hub</a>
                 <h1 style="margin-top:5px;">Admin Order Manager</h1>
             </div>
             <button onclick="loadOrders()" style="padding: 8px 15px; cursor: pointer;">Refresh</button>
         </header>
+
+        <script src="auth.js"></script>
         <script>
+            checkAuth('admin');
             if (new URLSearchParams(window.location.search).get("admin") === "true") {
                 document.getElementById("back-link").style.display = "inline-block";
             }
