@@ -222,8 +222,7 @@
       vendorSelect.addEventListener("change", () => loadVendorOrders(vendorSelect.value));
     }
 
-    function toggleDelivery(orderId, currentStatus) {
-      const newStatus = currentStatus === 'Delivered' ? 'Pending' : 'Delivered';
+    function updateStatus(orderId, newStatus) {
       fetch(`${API}/order/${orderId}/delivery`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -263,12 +262,23 @@
 
           ordersDiv.innerHTML = "";
           Object.values(orders).forEach(order => {
-            const isDelivered = order.status === 'Delivered';
+            const status = order.status;
+            let btnHtml = '';
+
+            // Status Flow: Pending -> Accepted -> Delivered
+            if (status === 'Pending') {
+              btnHtml = `<button onclick="updateStatus('${order.id}', 'Accepted')" class="status-btn" style="background:var(--warning); color:black;">Accept Order</button>`;
+            } else if (status === 'Accepted') {
+              btnHtml = `<button onclick="updateStatus('${order.id}', 'Delivered')" class="status-btn" style="background:var(--primary); color:white;">Mark as Delivered</button>`;
+            } else if (status === 'Delivered') {
+              btnHtml = `<button onclick="updateStatus('${order.id}', 'Accepted')" class="status-btn" style="background:var(--success); color:white;">✓ Delivered (Undo)</button>`;
+            }
+
             const card = document.createElement("div");
             card.className = "customer-card";
             card.innerHTML = `
           <div class="customer-header">
-            <span class="customer-name">${order.name}</span>
+            <span class="customer-name">${order.name} <span style="font-weight:normal; font-size:0.8em; margin-left:10px; padding:2px 6px; border-radius:4px; background:#eee;">${status}</span></span>
             <span class="customer-phone">${order.phone}</span>
           </div>
           <div class="item-list">
@@ -279,12 +289,7 @@
               </div>
             `).join('')}
           </div>
-          <button onclick="toggleDelivery('${order.id}', '${order.status}')" 
-                  class="status-btn" 
-                  style="background:${isDelivered ? 'var(--success)' : 'var(--warning)'}; 
-                         color:${isDelivered ? 'white' : 'black'};">
-            ${isDelivered ? '✓ Delivered' : 'Mark as Delivered'}
-          </button>`;
+          ${btnHtml}`;
             ordersDiv.appendChild(card);
           });
         })

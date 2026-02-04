@@ -111,6 +111,11 @@
                 <div class="title">Manage Menu</div>
                 <div class="desc">Add or remove items from your menu</div>
             </a>
+            <a href="#" onclick="showPasswordModal()" class="card">
+                <div class="icon">🔑</div>
+                <div class="title">Change Password</div>
+                <div class="desc">Update your login credentials</div>
+            </a>
         </div>
     </div>
 
@@ -138,7 +143,47 @@
         document.getElementById("sum-link").href = `vendor-stats.html?vendor_id=${vendorId}`;
         document.getElementById("menu-link").href = `vendor-menu.html?vendor_id=${vendorId}`;
 
-        // Legacy menu script removed
+        document.getElementById("menu-link").href = `vendor-menu.html?vendor_id=${vendorId}`;
+
+        // Password Change Logic
+        function showPasswordModal() {
+            const modal = document.createElement('div');
+            modal.id = 'pwd-modal';
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:1000;';
+            modal.innerHTML = `
+            <div style="background:white;padding:25px;border-radius:15px;width:90%;max-width:350px;">
+                <h3 style="margin-top:0;">Change Password</h3>
+                <input type="password" id="oldPwd" placeholder="Old Password" style="width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:8px;">
+                <input type="password" id="newPwd" placeholder="New Password" style="width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:8px;">
+                <button onclick="changePassword()" style="width:100%;padding:10px;background:var(--primary);color:white;border:none;border-radius:8px;font-weight:bold;margin-bottom:10px;">Update</button>
+                <button onclick="document.getElementById('pwd-modal').remove()" style="width:100%;padding:10px;background:#eee;color:black;border:none;border-radius:8px;">Cancel</button>
+            </div>
+        `;
+            document.body.appendChild(modal);
+        }
+
+        async function changePassword() {
+            const oldPwd = document.getElementById('oldPwd').value;
+            const newPwd = document.getElementById('newPwd').value;
+            if (!oldPwd || !newPwd) return alert("Please fill all fields");
+
+            try {
+                const res = await fetch(`${API}/change-password`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ vendorId: vendorId, oldPassword: oldPwd, newPassword: newPwd })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("Password updated successfully!");
+                    document.getElementById('pwd-modal').remove();
+                } else {
+                    alert(data.error || "Failed to update password");
+                }
+            } catch (e) {
+                alert("Error updating password");
+            }
+        }
     </script>
 
 </html>
