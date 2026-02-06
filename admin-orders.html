@@ -254,6 +254,18 @@
 
                 <div class="order-footer">
                     <button class="btn-delete-order" onclick="deleteOrder(${order.id})">Delete Order</button>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select onchange="updateDeliveryStatus(${order.id}, this.value)" style="padding: 5px; border-radius: 4px;">
+                             <option value="Pending" ${order.delivery_status === 'Pending' ? 'selected' : ''}>Pending</option>
+                             <option value="Accepted" ${order.delivery_status === 'Accepted' ? 'selected' : ''}>Accepted</option>
+                             <option value="Delivered" ${order.delivery_status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                        </select>
+                        
+                        <button onclick="togglePaymentStatus(${order.id}, '${order.payment_status}')" 
+                                style="background: ${order.payment_status === 'PAID' ? '#ffc107' : '#28a745'}; color: ${order.payment_status === 'PAID' ? '#000' : '#fff'}; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                            ${order.payment_status === 'PAID' ? 'Mark Unpaid' : 'Mark Paid'}
+                        </button>
+                    </div>
                     <div class="total-price">Total: ${order.total}kr</div>
                 </div>
             `;
@@ -310,6 +322,30 @@
                 body: JSON.stringify({ quantity: newQty })
             });
             loadOrders(); // Reload to see price update
+        }
+
+        async function updateDeliveryStatus(orderId, status) {
+            try {
+                await fetch(`${API}/order/${orderId}/delivery`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                // Optional: show toast or tiny notification instead of full reload
+                // loadOrders(); 
+            } catch (err) { console.error(err); alert("Failed to update status"); }
+        }
+
+        async function togglePaymentStatus(orderId, currentStatus) {
+            const newStatus = currentStatus === 'PAID' ? 'UNPAID' : 'PAID';
+            try {
+                await fetch(`${API}/admin/order/${orderId}/payment`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                loadOrders();
+            } catch (err) { console.error(err); alert("Failed to update payment"); }
         }
 
         function filterOrders() {
